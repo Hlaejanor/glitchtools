@@ -1,0 +1,14 @@
+requests
+scipy
+beautifulsoup4
+pytest
+imageio
+astropy
+tabulate
+numpy
+pandas
+matplotlib
+scikit-learn
+imageio-ffmpeg
+argparse
+amplpy

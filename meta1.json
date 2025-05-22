@@ -1,0 +1,33 @@
+{
+    "id": 1,
+    "raw_event_file": "/antares_chandra/15734/primary/hrcf15734N003_evt2.fits",
+    "synthetic": false,
+    "source_pos_x": 512,
+    "source_pos_y": 512,
+    "resolution": 1024,
+    "max_energy": 10,
+    "min_energy": 0.3,
+    "source_radius": 240,
+    "source_filename": "chandra_filtered_pi_reduced.csv",
+    "wavelength_bins": 100,
+    "time_bin_seconds": 100,
+    "background_filename": "chandra_bkf.csv",
+    "cropped_count": 546451,
+    "source_count": 1219257,
+    "anullus_radius_inner": 35.0,
+    "anullus_radius_outer": 50.0,
+    "star": "Chandra Antares",
+    "alpha": 1,
+    "g": null,
+    "lucretius": -1,
+    "r_e": 2,
+    "velocity": 0.12,
+    "theta": 0.5759592291,
+    "t_max": 24183.05501407385,
+    "offset": [
+        0.0,
+        0.0
+    ],
+    "lowPI": 87,
+    "highPI": 847
+}

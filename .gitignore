@@ -1,0 +1,14 @@
+venv
+fits/*
+cleanup
+temp/*
+plots/*
+meta_files/*
+beat/beat_metadata.csv
+.DS_Store
+videos/*.mp4
+*.pyc
+__pycache__
+.vscode
+copyfiles.sh
+fourier_peaks_ll_*.png
