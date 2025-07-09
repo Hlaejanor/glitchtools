@@ -461,9 +461,9 @@ def plot_flux_excess_variability(variability, filename, dt, show=True):
         np.exp(intercept) * variability["Wavelength Center"] ** n,
         color="red",
         linestyle="--",
-        label=f"Fit: V(E) ∝ E^{n:.2f}",
+        label=f"Fit: V(λ) ∝ λ^{n:.2f}"
     )
-    print(f"Fit: V(E) ∝ E^{n:.2f}")
+    print(f"Fit: V(λ) ∝ λ^{n:.2f}")
 
     # Adjust the axes
     plt.xscale("log")
@@ -712,9 +712,9 @@ def plot_broken_power_law(
                     x_fit,
                     y_fit,
                     linestyle="--",
-                    label=f"{label}: V(E) ∝ E^{epsilon_fit:.2f}",
+                    label=f"{label}: V(λ) ∝ λ^{epsilon_fit:.2f}",
                 )
-                print(f"{label}: V(E) ∝ E^{epsilon_fit:.2f}")
+                print(f"{label}: V(λ) ∝ λ^{epsilon_fit:.2f}")
 
             except RuntimeError:
                 print(f"Fit failed for range {label}")

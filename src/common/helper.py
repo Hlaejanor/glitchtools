@@ -315,6 +315,19 @@ def randomly_sample_from(dataset, count: int, seed=None):
     )
 
 
+def split_into_time_bins(dataset, bins=100, seed=None):
+    t_min = dataset["relative_time"].min()
+    t_max = dataset["relative_time"].max()
+    bin_edges = np.linspace(t_min, t_max, bins + 1)
+
+    dataset["time_bin"] = pd.cut(dataset["relative_time"], bins=bin_edges, labels=False)
+
+    # Group by the "time bin" column and get row indices for each bin
+    bin_indices = [group.index.to_numpy() for _, group in dataset.groupby("time_bin")]
+
+    return bin_indices
+
+
 def sample_evenly_from_wavelength_bins(dataset, count: int, bins=100, seed=None):
     print(f"Reducing dataset ...")
 
