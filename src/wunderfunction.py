@@ -84,13 +84,13 @@ def evaluate_lightlane_score(
     median_loss = np.median(loss_per_sample)
 
     # Final loss includes the penalty for small g
-    
+
     return median_loss + penalty
 
 
 def objective_with_data(params, data, i):
     # This returns the loss for each parameter combination
-    #print(f"Evaluating time bin {i}")
+    # print(f"Evaluating time bin {i}")
     loss = evaluate_lightlane_score(params, data, i)
 
     return loss
@@ -107,10 +107,12 @@ def count_lightlanes_intersecting_camera_vectorized(
     v = np.array([np.cos(theta), np.sin(theta)])
 
     # Camera positions at each time
-    positions = np.stack([phase + times * v[0], perp + times * v[1]], axis=1)  # shape (N, 2)
+    positions = np.stack(
+        [phase + times * v[0], perp + times * v[1]], axis=1
+    )  # shape (N, 2)
 
     # Grid spacing g at each time
-    g_vals = alpha / (particle_lambdas ** lucretius)
+    g_vals = alpha / (particle_lambdas**lucretius)
 
     # Preallocate result
     lanecounts = np.zeros_like(times, dtype=int)
@@ -119,7 +121,7 @@ def count_lightlanes_intersecting_camera_vectorized(
     for i in range(len(times)):
         pos = np.array(positions[i], dtype=np.float64)
         g = g_vals[i]
-        
+
         # Determine the number of rows/cols to check
         M = int(np.ceil((2 * r_e) / g))
         if M > 10:
@@ -259,7 +261,7 @@ if __name__ == "__main__":
     bounds = [
         (0, 100),  # phase, mod g
         (0, 100),  # perp, mod g
-        (0, np.pi/6),  # theta
+        (0, np.pi / 6),  # theta
         (0.01, 1000.0),  # alpha
         (0.1, 2),  # lucretius
         (0, 3),  # r_e
@@ -304,7 +306,7 @@ if __name__ == "__main__":
         losses = evaluate_lightlane_score(result.x, bind, i=0)
         row_with_loss = np.append(result.x, losses)
         best_params.append(row_with_loss)
-        save_to_csv(row_with_loss,  "wunder.csv")
+        save_to_csv(row_with_loss, "wunder.csv")
 
     recovered_gen = GenerationParameters(
         id=f"{meta.id}_rec",

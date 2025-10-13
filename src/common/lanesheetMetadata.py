@@ -14,7 +14,7 @@ class LanesheetMetadata:
     alpha: float
     lucretius: float
     r_e: float
-    theta: float
+    # theta: float
     perp: float
     phase: float
     alpha_tolernace: float = None
@@ -38,7 +38,7 @@ class LanesheetMetadata:
             alpha=self.alpha,
             lucretius=self.lucretius,
             r_e=self.r_e,
-            theta=self.theta,
+            # theta=self.theta,
             pert=self.perp,
             phase=self.phase,
             theta_tolerance=self.theta_tolerance,

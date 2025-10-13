@@ -4,7 +4,10 @@ import gzip
 import shutil
 from common.fitsread import generate_metadata_from_fits
 from common.helper import compare_dataframes, get_duration
-from var_analysis.plotting import plot_spectrum_vs_data, compute_time_variability
+from event_processing.plotting import (
+    plot_spectrum_vs_data,
+    compute_time_variability_async,
+)
 from common.powerdensityspectrum import compute_spectrum_params, PowerDensitySpectrum
 from common.metadatahandler import (
     load_fits_metadata,
@@ -18,8 +21,8 @@ from common.metadatahandler import (
 )
 from common.helper import compare_variability_profiles
 from common.fitsread import (
-    read_crop_and_project_to_ccd,
-    fits_save_from_generated,
+    read_event_data_crop_and_project_to_ccd,
+    fits_save_events_generated,
     fits_read,
     fits_save,
 )
@@ -32,7 +35,7 @@ from common.fitsmetadata import (
     GenerationParameters,
 )
 from common.helper import randomly_sample_from
-from var_analysis.readandplotchandra import (
+from event_processing.var_analysis_plots import (
     binning_process,
     experiment_exists,
 )
@@ -72,19 +75,6 @@ def parse_arguments():
     return args
 
 
-def downsample_antares(N):
-    print("Loading file for downsampling ")
-    A_meta = load_fits_metadata("antares0")
-    A_events = fits_read(A_meta.raw_event_file)
-
-    A_reduced = randomly_sample_from(A_events, N)
-    A_meta.source_count = N
-    A_meta.id = f"antares_{int(N/1000)}k"
-
-    A_meta = fits_save(A_reduced, A_meta)
-    save_fits_metadata(A_meta)
-
-
 def decompress_gz_file(gz_path):
     if not gz_path.endswith(".gz"):
         raise ValueError("Expected a .gz file for decompression.")
@@ -120,15 +110,18 @@ def main(generate: bool = True):
 
     pp = load_processing_param("default")
     assert pp is not None, "Processing parameters cannot be None"
-    save_fits_metadata(metadata=default_metadata)
+    save_fits_metadata(meta=default_metadata)
 
     source_data = fits_read(default_metadata.raw_event_file)
 
     print("Estimate spectrum")
 
-    success, default_metadata, pp, A_processed_events = read_crop_and_project_to_ccd(
-        default_metadata.id, pp.id
-    )
+    (
+        success,
+        default_metadata,
+        pp,
+        A_processed_events,
+    ) = read_event_data_crop_and_project_to_ccd(default_metadata.id, pp.id)
 
     if not success:
         raise Exception("Error when corpping and project")

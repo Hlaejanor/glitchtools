@@ -5,7 +5,7 @@ from common.fitsmetadata import FitsMetadata, GenerationParameters
 from common.fitsread import (
     fits_file_exists,
     fits_read,
-    fits_save_from_generated,
+    fits_save_events_generated,
     pi_channel_to_wavelength_and_width,
 )
 
@@ -20,23 +20,34 @@ from common.helper import (
 )
 
 
-def generate_synth_if_need_be(
-    meta: FitsMetadata, pds: PowerDensitySpectrum, lamb=None, lwidth=None
-):
-    if fits_file_exists(meta.synthetic_twin_event_file):
+def regenerate_synth_file(meta: FitsMetadata, genmeta: GenerationParameters):
+    print(f"Regenerating synthetic file for meta {meta.id}")
+    log = []
+    events = generate_synthetic_telescope_data(
+        genmeta, single_wavelength=None, lwidth=None
+    )
+    log.append(f"Saving synthetic event file to fits file :{meta.raw_event_file}")
+    fits_save_events_generated(events=events, genmeta=genmeta)
+
+
+def generate_synth_if_need_be(meta: FitsMetadata, lamb=None, lwidth=None):
+    if fits_file_exists(meta.synthetic):
         events = fits_read(meta.synthetic_twin_event_file)
     else:
         events = generate_synthetic_telescope_data(
             meta, single_wavelength=lamb, lwidth=lwidth
         )
-        fits_save_from_generated(events, meta.synthetic_twin_event_file)
+        fits_save_events_generated(events, meta.synthetic_twin_event_file)
 
     return True
 
 
-def generate_synthetic_telescope_data(
-    genmeta: GenerationParameters, wavelength_bins=100, halt_at_count=np.inf
-):
+"""
+Using the generation parameters, produce 
+"""
+
+
+def generate_synthetic_telescope_data(genmeta: GenerationParameters, wavelength_bins):
     events = []
     assert genmeta.t_max is not None, "t_max must be set and > 0"
     assert genmeta.spectrum is not None, "Spectrum must be set to generate data"
@@ -63,16 +74,17 @@ def generate_synthetic_telescope_data(
     l_idx = 0
     total_added = 0
     for lamb, lambda_bin_width in lambdas:
-        if lamb > 0.12 and lamb < 0.15:
-            print("HEre")
         t = 0.0
-        flux_per_sec = exp_count_per_sec(
-            lamb,
-            genmeta.spectrum.A,
-            genmeta.spectrum.lambda_0,
-            genmeta.spectrum.sigma,
-            genmeta.spectrum.C,
-        )
+        flux_per_sec = (
+            exp_count_per_sec(
+                lamb,
+                genmeta.spectrum.A,
+                genmeta.spectrum.lambda_0,
+                genmeta.spectrum.sigma,
+                genmeta.spectrum.C,
+            )
+            / 2
+        )  # Divide by two to get the same counts for the datasets. Somewhere (could be in the esimation of the flux per seconds for the spectrum) there is a factor 2 error.
         assert lambda_bin_width > 0, f"Lambda bin must be > 0, was {lambda_bin_width}"
         print(f"Flux per {lamb}:  {flux_per_sec} per sec from empirical lambda ")
 
@@ -82,40 +94,53 @@ def generate_synthetic_telescope_data(
             lambda_center=lamb,
             lambda_width=lambda_bin_width,
             exp_flux_per_sec=flux_per_sec,
-            start_t=0,
-            g=genmeta.get_g(lamb),
-            theta=genmeta.theta,
+            alpha=genmeta.alpha,
+            # theta=genmeta.theta,
             r_e=genmeta.r_e,
             perp=genmeta.perp,
             phase=genmeta.phase,
+            lucretius=genmeta.lucretius,
+            lucretius_tolerance=None,
+            alpha_tolernace=None,
+            perp_tolerance=None,
+            phase_tolerance=None,
+            theta_tolerance=None,
         )
 
         dt = 100
-        pos = (genmeta.phase + t) * velvec
+
         perp_dir = np.array([-velvec[1], velvec[0]])
-        pos += perp_dir * genmeta.perp
+        pos = perp_dir * genmeta.perp
         # Use the same x-ray distribution as the chandra dataset, to obtain an estimate for the number of photons to expect on average for this time bin length
-        exp_lanecount = estimate_lanecount_fast(lanesheet_meta)
+        exp_lanecount = estimate_lanecount_fast(
+            lanesheet_meta
+        )  # Divide by two to get the same counts for the datasets. Somewhere (could be in the esimation of the flux per seconds for the spectrum) there is a factor 2 error.
         while t < genmeta.t_max:
+            theta = genmeta.theta_change_per_sec * t + genmeta.theta
+
             if exp_lanecount > 4:
                 print(
-                    f"{genmeta.id}: Generating synthetic data  (isotropic): Time t:{t} for lambda: {lamb} : Flux {flux_per_sec}/s. Lanecount: {exp_lanecount}"
+                    f"{genmeta.id}: SYNTH gen  (isotropic): Time t:{t} for lambda: {lamb}, theta {theta:.2f} Flux {flux_per_sec}/s. Lanecount: {exp_lanecount}"
                 )
                 hits = generate_synthetic_hits_isotropic(t, dt, lanesheet_meta)
                 if hits.size > 0:
                     events.extend(hits)
             else:
-                print(
-                    f"{genmeta.id}: Generating synthetic data  (lightlane): Time t:{t} for lambda: {lamb} : Flux {flux_per_sec}/s. Lanecount: {exp_lanecount}"
-                )
+                # Compute the change in theta over time
 
+                # Compute the new velocity vector
+                velvec = np.array([np.cos(theta), np.sin(theta)])
+                pos += dt * velvec
+                print(
+                    f"{genmeta.id}: SYNTH gen (lightlane): Time t:{t} for lambda: {lamb}, theta {theta:.2f}  Flux {flux_per_sec}/s. Lanecount: {exp_lanecount}"
+                )
                 if True:
                     try:
                         points, tree = generate_triangular_grid_along_path(
                             pos,
-                            lanesheet_meta.theta,
+                            theta,
                             dt,
-                            lanesheet_meta.g,
+                            lanesheet_meta.get_g(),
                             lanesheet_meta.r_e,
                         )
                     except Exception as e:
@@ -128,18 +153,17 @@ def generate_synthetic_telescope_data(
                         lanesheet_meta.g,
                         lanesheet_meta.r_e,
                     )
-                hits = generate_synthetic_hits_vectorized_3(t, dt, lanesheet_meta, tree)
+                hits = generate_synthetic_hits_vectorized_3(
+                    pos=pos,
+                    theta=theta,
+                    t0=t,
+                    dt=dt,
+                    ls=lanesheet_meta,
+                    lanesheet_tree=tree,
+                )
                 total_added += len(hits)
                 if hits.size > 0:
                     events.extend(hits)
-
-                if total_added > halt_at_count:
-                    print(
-                        f"We reached the target at of {halt_at_count} events at {lamb}"
-                    )
-                    raise Exception(
-                        f"We reached the target at of {halt_at_count} events at {lamb}"
-                    )
 
             t += dt
 
@@ -190,7 +214,13 @@ def generate_synthetic_hits_isotropic_old(meta: LanesheetMetadata):
     return np.array(camera_hits)
 
 
-def generate_dataset_for_experiment(ls: LanesheetMetadata, dt: int = 100, t_max=10000):
+def generate_dataset_for_experiment(
+    theta_0: float,
+    theta_change_er_sec: float,
+    ls: LanesheetMetadata,
+    dt: int = 1,
+    t_max=10000,
+):
     photon_hits = []
     t0 = 0.0
     lc = estimate_lanecount_fast(ls)
@@ -202,6 +232,7 @@ def generate_dataset_for_experiment(ls: LanesheetMetadata, dt: int = 100, t_max=
     t = 0
     while t < t_max:
         print(f"Generating for {ls.lambda_center} at time {t}")
+        theta = theta_0 + theta_change_er_sec * t
         if lc > 5:
             more_hits = generate_synthetic_hits_isotropic(t0=t0, dt=dt, meta=ls)
 
@@ -212,7 +243,11 @@ def generate_dataset_for_experiment(ls: LanesheetMetadata, dt: int = 100, t_max=
             )
 
             more_hits = generate_synthetic_hits_vectorized_3(
-                t0=t, dt=dt, ls=ls, lanesheet_tree=lanesheet_tree
+                t0=t,
+                theta=theta,
+                dt=dt,
+                ls=ls,
+                lanesheet_tree=lanesheet_tree,
             )
             photon_hits.extend(more_hits)
         t += dt
@@ -310,20 +345,14 @@ def generate_triangular_grid_along_path(start, theta, dt, g, r_e):
     return points, cKDTree(points)
 
 
-def generate_synthetic_hits_isotropic(t0: float, dt, meta: LanesheetMetadata):
-    velvec = np.array([np.cos(meta.theta), np.sin(meta.theta)])
-    perp_vec = np.array(
-        [-np.sin(meta.theta), np.cos(meta.theta)]
-    )  # perpendicular direction
-
-    offset = meta.phase * velvec + meta.perp * perp_vec
+def generate_synthetic_hits_isotropic(t0: float, dt: float, meta: LanesheetMetadata):
     halfwidth = meta.lambda_width / 2
 
     hits = []
 
     n_photons = np.random.poisson(meta.exp_flux_per_sec * meta.lambda_width * dt)
     if n_photons == 0:
-        return np.empty((0, 6))
+        return np.empty((0, 4))
     # offset = np.array([np.cos(meta.phase), np.sin(meta.perp)])
     ccd_pos = np.random.uniform(-1.0, 1.0, (n_photons, 2))
     random_offsets = np.random.uniform(0, dt, size=n_photons)
@@ -345,17 +374,22 @@ def generate_synthetic_hits_isotropic(t0: float, dt, meta: LanesheetMetadata):
     hits.append(photons)
 
     if len(hits) == 0:
-        return np.empty((0, 6))  # important: must match 6 columns always!
+        return np.empty((0, 4))  # important: must match 6 columns always!
 
-    hits = np.vstack(hits)  # stack properly
+    hits = np.vstack(hits)
     return hits
 
 
 def generate_synthetic_hits_vectorized_3(
-    t0: float, dt: float, ls: LanesheetMetadata, lanesheet_tree
+    pos: np.array,
+    t0: float,
+    dt: float,
+    theta: float,
+    ls: LanesheetMetadata,
+    lanesheet_tree,
 ):
     try:
-        velvec = np.array([np.cos(ls.theta), np.sin(ls.theta)])
+        velvec = np.array([np.cos(theta), np.sin(theta)])
         interpolation = (ls.r_e / np.linalg.norm(velvec)) * 100
         idt = dt / interpolation
         exp_lanecount = estimate_lanecount_fast(ls)
@@ -363,10 +397,6 @@ def generate_synthetic_hits_vectorized_3(
             ls.exp_flux_per_sec * ls.lambda_width
         ) / exp_lanecount
         exp_count_per_lane_per_idt = exp_count_per_lane_per_sec * idt
-        pos = ls.phase * velvec
-
-        perp_dir = np.array([-velvec[1], velvec[0]])
-        pos += ls.perp * perp_dir
         hits = []
         t = 0
         halfwidth = ls.lambda_width / 2
@@ -387,7 +417,7 @@ def generate_synthetic_hits_vectorized_3(
         times = np.array(times)  # The points in time that were close enough
         lanes = np.array(lanes)
         if len(positions) == 0:
-            positions = np.empty((0, 6))
+            positions = np.empty((0, 4))
         else:
             positions = np.array(positions)
 
@@ -400,7 +430,7 @@ def generate_synthetic_hits_vectorized_3(
 
         photon_hits = np.random.poisson(sum_of_lanes * exp_count_per_lane_per_idt)
         if photon_hits == 0:
-            return np.empty((0, 6))
+            return np.empty((0, 4))
         # Precompute cumulative probabilities
         cumulative_prob = np.cumsum(p_planes)
 
@@ -437,11 +467,11 @@ def generate_synthetic_hits_vectorized_3(
 
 
 def generate_synthetic_hits_vectorized_2(
-    t0: float, meta: LanesheetMetadata, lanesheet_tree
+    t0: float, theta: float, meta: LanesheetMetadata, lanesheet_tree
 ):
     dt = meta.dt
 
-    velvec = np.array([np.cos(meta.theta), np.sin(meta.theta)])
+    velvec = np.array([np.cos(theta), np.sin(theta)])
     meta.interpolation = (meta.r_e / np.linalg.norm(velvec)) * 10
 
     idt = meta.dt / meta.interpolation
@@ -494,12 +524,12 @@ def generate_synthetic_hits_vectorized_2(
 
 
 def generate_synthetic_hits_vectorized(
-    t0: float, meta: LanesheetMetadata, lanesheet_tree
+    t0: float, theta: float, meta: LanesheetMetadata, lanesheet_tree
 ):
     idt = meta.dt / meta.interpolation
     dt = meta.dt
     exp_lanecount = estimate_lanecount_fast(meta)
-    velvec = np.array([np.cos(meta.theta), np.sin(meta.theta)])
+    velvec = np.array([np.cos(theta), np.sin(theta)])
     motion_margin = idt * np.linalg.norm(velvec)
     r_query = meta.r_e + motion_margin
 

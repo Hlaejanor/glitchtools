@@ -7,7 +7,7 @@ from common.helper import get_duration
 from common.fitsmetadata import Spectrum, ProcessingParameters, GenerationParameters
 from common.fitsread import (
     pi_channel_to_wavelength_and_width,
-    read_crop_and_project_to_ccd,
+    read_event_data_crop_and_project_to_ccd,
 )
 from common.generate_data import (
     generate_synthetic_telescope_data,
@@ -92,7 +92,7 @@ def prepare_data(
     assert genparams is not None, "Genparams must be a Gen param object"
     assert pparams is not None, "Processing Params must be set"
     # 1. Load preprocessed events
-    success, meta, pp, events = read_crop_and_project_to_ccd(
+    success, meta, pp, events = read_event_data_crop_and_project_to_ccd(
         fits_id=meta.id, processing_param_id=pparams.id
     )
 
@@ -116,10 +116,10 @@ def prepare_data(
 
     # 6. Bin into frame time bins
     bin_edges = np.arange(0, duration + 1e-6, 1 / fps)
-    events["Time Bin"] = pd.cut(
+    events["Time Bin 0"] = pd.cut(
         events["video_time"], bins=bin_edges, labels=False, include_lowest=True
     )
-    events.sort_values("Time Bin", inplace=True)
+    events.sort_values("time_bin", inplace=True)
 
     print(f"Prepared {len(events)} events over {duration}s video duration")
     return events
@@ -169,7 +169,7 @@ def make_video(
     frames = []
 
     # Precompute a dictionary: frame index → DataFrame slice
-    events_by_frame = events.groupby("Time Bin")
+    events_by_frame = events.groupby("time_bin")
 
     # Precompute a dictionary: frame index → DataFrame slice
     frame_dict = {frame: group for frame, group in events_by_frame}
@@ -338,6 +338,6 @@ if __name__ == "__main__":
             duration=duration,
         )
 
-    # meta: FitsMetadata = load_fits_metadata(f"meta_files/meta_{meta_id}.json")
+    # meta: FitsMetadata = load_fits_metadata(f"meta_files/{meta_id}.json")
 
     # make_video(meta, lamb=lamb, lwidth=lwidth, pi_channel=pi_channel, fps=fps)

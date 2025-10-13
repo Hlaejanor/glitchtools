@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
-from common.helper import compare_dataframes
-from var_analysis.plotting import plot_spectrum_vs_data, compute_time_variability
+from common.helper import compare_dataframes, get_uneven_time_bin_widths
+from event_processing.plotting import (
+    plot_spectrum_vs_data,
+    compute_time_variability_async,
+)
 from common.helper import compare_variability_profiles, get_duration
 from common.fitsmetadata import GenerationParameters
 from common.powerdensityspectrum import compute_spectrum_params, PowerDensitySpectrum
@@ -9,17 +12,17 @@ from common.fitsread import (
     load_fits_metadata,
     save_fits_metadata,
     load_processing_param,
-    fits_save_from_generated,
-    read_crop_and_project_to_ccd,
+    fits_save_events_generated,
+    read_event_data_crop_and_project_to_ccd,
     chandra_like_pi_mapping,
 )
 import random as rnd
 import uuid
 from common.metadatahandler import load_summaries, save_gen_param
-from var_analysis.plotting import plot_spectrum_vs_data
+from event_processing.plotting import plot_spectrum_vs_data
 from common.fitsmetadata import FitsMetadata, Spectrum
 from common.helper import randomly_sample_from
-from var_analysis.readandplotchandra import (
+from event_processing.var_analysis_plots import (
     binning_process,
     experiment_exists,
 )
@@ -99,7 +102,7 @@ def refine_search(
 
     pp = load_processing_param(processing_parameters_id)
     duration = get_duration(chandra_meta, pp)
-    success, fits_meta, pp, chandra_data = read_crop_and_project_to_ccd(
+    success, fits_meta, pp, chandra_data = read_event_data_crop_and_project_to_ccd(
         chandra_meta.id, pp.id
     )
     if not success:
@@ -109,6 +112,7 @@ def refine_search(
         id="template",
         alpha=1.0,
         lucretius=-1,
+        theta_change_per_sec=0.0,
         r_e=1,
         theta=0.2,
         t_max=duration,
@@ -160,8 +164,13 @@ def refine_search(
             # Generate + process synthetic data
             print(f"Fits file {genmeta.raw_event_file}")
             events = generate_synthetic_telescope_data(genmeta)
-            new_fits_meta = fits_save_from_generated(events=events, genmeta=genmeta)
-            success, new_fits_meta, pp, synth_data = read_crop_and_project_to_ccd(
+            new_fits_meta = fits_save_events_generated(events=events, genmeta=genmeta)
+            (
+                success,
+                new_fits_meta,
+                pp,
+                synth_data,
+            ) = read_event_data_crop_and_project_to_ccd(
                 new_fits_meta.id, processing_param_id=processing_parameters_id
             )
             if not success:
@@ -181,12 +190,16 @@ def refine_search(
                 source_data=chandra_data, meta=chandra_meta, pp=pp
             )
 
-            synth_var = compute_time_variability(
-                source_data=synth_binned, duration=duration
+            synth_var = compute_time_variability_async(
+                binned_datasets=synth_binned,
+                duration=duration,
+                time_bin_chunk_length=pp.time_bin_chunk_length,
             )
 
-            real_var = compute_time_variability(
-                source_data=real_binned, duration=duration
+            real_var = compute_time_variability_async(
+                binned_datasets=real_binned,
+                duration=duration,
+                time_bin_chunk_length=pp.time_bin_chunk_length,
             )
 
             # Compare to real data
@@ -266,7 +279,7 @@ def parameter_search(
 
     pp = load_processing_param(processing_parameters_id)
     duration = get_duration(chandra_meta, pp)
-    success, chandra_meta, pp, chandra_data = read_crop_and_project_to_ccd(
+    success, chandra_meta, pp, chandra_data = read_event_data_crop_and_project_to_ccd(
         fits_id=target_meta_id, processing_param_id="test_1"
     )
     # chandra_reduced = randomly_sample_from(chandra_data, 100000)
@@ -275,6 +288,7 @@ def parameter_search(
         id="template",
         alpha=1.0,
         lucretius=-1,
+        theta_change_per_sec=0.0,
         r_e=1,
         theta=0.2,
         t_max=duration,
@@ -300,8 +314,15 @@ def parameter_search(
         for genmeta in genmetas:
             synth_data = generate_synthetic_telescope_data(genmeta)
 
-            new_fits_meta = fits_save_from_generated(events=synth_data, genmeta=genmeta)
-            success, new_fits_meta, pp, synth_data = read_crop_and_project_to_ccd(
+            new_fits_meta = fits_save_events_generated(
+                events=synth_data, genmeta=genmeta
+            )
+            (
+                success,
+                new_fits_meta,
+                pp,
+                synth_data,
+            ) = read_event_data_crop_and_project_to_ccd(
                 new_fits_meta.id, processing_param_id=processing_parameters_id
             )
 
@@ -321,17 +342,23 @@ def parameter_search(
             synth_binnned, new_fits_meta = binning_process(
                 source_data=synth_data, meta=new_fits_meta, pp=pp
             )
-
+            time_bin_widths = get_uneven_time_bin_widths(pp)
             if "Wavelength Bin" not in synth_binnned.columns:
                 print("We found a problem ,Wavelength Bin was not in synth_binned")
                 continue
 
-            chandra_var = compute_time_variability(
-                source_data=chandra_binned, duration=duration
+            chandra_var = compute_time_variability_async(
+                binned_datasets=chandra_binned,
+                meta=chandra_meta,
+                pp=pp,
+                time_bin_widths=time_bin_widths,
             )
 
-            synth_var = compute_time_variability(
-                source_data=synth_binnned, duration=duration
+            synth_var = compute_time_variability_async(
+                binned_datasets=synth_binnned,
+                meta=new_fits_meta,
+                pp=pp,
+                time_bin_widths=time_bin_widths,
             )
             # var_analysis_plot(synth_var)
             # Compare to real data

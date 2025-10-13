@@ -16,11 +16,12 @@ import matplotlib.pyplot as plt
 from common.helper import filter_by_wavelength_bin, get_wavelength_bins
 from common.fitsmetadata import FitsMetadata, GenerationParameters, ProcessingParameters
 from common.powerdensityspectrum import exp_count_per_sec
-from common.fitsread import fits_read, read_crop_and_project_to_ccd
+from common.fitsread import fits_read, read_event_data_crop_and_project_to_ccd
 from common.metadatahandler import (
     load_pipeline,
     load_processing_param,
     load_gen_param,
+    save_gen_param,
     load_fits_metadata,
     save_fits_metadata,
 )
@@ -171,7 +172,7 @@ def estimate_lanestack(
     events = fits_read(meta.raw_event_file)
 
     # Crop and process the data to in standard way
-    success, meta, pp, events = read_crop_and_project_to_ccd(meta.id, pp.id)
+    success, meta, pp, events = read_event_data_crop_and_project_to_ccd(meta.id, pp.id)
     if not success:
         raise Exception("Processing the data failed")
 
@@ -373,6 +374,7 @@ if __name__ == "__main__":
         id="template",
         alpha=1.0,
         lucretius=-1,
+        theta_change_per_sec=0.0,
         r_e=1,
         theta=0.2,
         t_max=1000,
@@ -384,6 +386,8 @@ if __name__ == "__main__":
         star="Fitting",
         spectrum=meta.apparent_spectrum,
     )
+
+    save_gen_param(default_gen)
 
     param_grid = {
         "r_e": np.linspace(0.1, 20, 100),

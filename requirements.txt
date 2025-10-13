@@ -1,3 +1,5 @@
+IPython
+statsmodels
 requests
 scipy
 beautifulsoup4

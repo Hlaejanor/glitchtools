@@ -1,0 +1,634 @@
+pipeline_id,variability_type,A,B,threshold_q,null_n,antares_m,exceedances_x,exceed_rate_p_hat,null_rate_p0,enrichment_p_hat_over_p0,p_value_binomial,comparing_to_self,significant,ci95_p_hat_low,ci95_p_hat_high
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,21.930675900540447,100000,100000,38,0.00038,0.001,0.38,0.9999999999995832,False,False,0.00028461123784292357,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.503162556609164,100000,100000,50,0.0005,0.001,0.5,0.9999999883705489,False,False,0.0003896668801092963,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.265822784810126,100000,100000,50,0.0005,0.001,0.5,0.9999999883705489,False,False,0.0003896668801092963,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,6.041280383746138,100000,100000,49,0.00049,0.001,0.49,0.9999999944086542,False,False,0.00038083785303653965,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,24.32980464244203,100000,100000,36,0.00036,0.001,0.36000000000000004,0.9999999999999462,False,False,0.0002673227178277469,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.920319239879421,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,3.733382424812237,100000,100000,108,0.00108,0.001,1.08,0.2243021129973756,False,False,0.0009150037313143558,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,21.930675900540447,100000,100000,38,0.00038,0.001,0.38,0.9999999999995832,False,False,0.00028461123784292357,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.503162556609164,100000,100000,50,0.0005,0.001,0.5,0.9999999883705489,False,False,0.0003896668801092963,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.265822784810126,100000,100000,50,0.0005,0.001,0.5,0.9999999883705489,False,False,0.0003896668801092963,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,6.041280383746138,100000,100000,49,0.00049,0.001,0.49,0.9999999944086542,False,False,0.00038083785303653965,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,24.32980464244203,100000,100000,36,0.00036,0.001,0.36000000000000004,0.9999999999999462,False,False,0.0002673227178277469,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.920319239879421,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,3.733382424812237,100000,100000,108,0.00108,0.001,1.08,0.2243021129973756,False,False,0.0009150037313143558,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,18.182159087713128,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.312848406948253,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,5.3492677535230735,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,5.087540323604867,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,21.095597702464904,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,2.706905097661826,100000,100000,96,0.00096,0.001,0.96,0.6688983557468624,False,False,0.0008047784317441446,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,3.510230609443634,100000,100000,148,0.00148,0.001,1.48,4.26575425600939e-06,False,True,0.0012858577011547045,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,19.31673791395337,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,2.3453402259116585,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,5.500620775279348,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,5.259348374423173,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,21.93488987753059,100000,100000,10,0.0001,0.001,0.1,1.0,False,False,5.425502627693371e-05,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,2.8029205547720464,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,3.7527767497325675,100000,100000,74,0.00074,0.001,0.74,0.997162644981469,False,False,0.0006044511478218331,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,20.332091367932108,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,2.4706253329155783,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,6.103989535644212,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,5.879391064106412,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,23.086924017851764,100000,100000,7,7e-05,0.001,0.06999999999999999,1.0,False,False,3.285360286106403e-05,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,2.8919492195141214,100000,100000,37,0.00037,0.001,0.37,0.9999999999998482,False,False,0.0002759577539061034,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,3.794898926405712,100000,100000,67,0.00067,0.001,0.67,0.9998096702998127,False,False,0.0005413150546896638,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,15.155257113682307,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.116349616308207,100000,100000,73,0.00073,0.001,0.73,0.997992127425434,False,False,0.0005954110926155418,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.478935698447895,100000,100000,73,0.00073,0.001,0.73,0.997992127425434,False,False,0.0005954110926155418,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.247159090909091,100000,100000,61,0.00061,0.001,0.61,0.9999892769027814,False,False,0.0004874912658966328,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.01085531258605,100000,100000,111,0.00111,0.001,1.11,0.14702017398406367,False,False,0.0009426466218526813,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.5758085503243477,100000,100000,174,0.00174,0.001,1.74,1.3017016591279294e-11,False,True,0.0015290148050778865,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.474396144861517,100000,100000,161,0.00161,0.001,1.61,1.2381859031306064e-08,False,True,0.0014072650364131453,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,14.704153196023267,100000,100000,129,0.00129,0.001,1.2899999999999998,0.0030164316878916824,False,False,0.0011091307976005063,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.0852199626154837,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,4.3481422924901185,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,4.17463112803427,100000,100000,112,0.00112,0.001,1.1199999999999999,0.12591983987513233,False,False,0.0009518680497319098,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,17.92966054538477,100000,100000,105,0.00105,0.001,1.0499999999999998,0.3215204792326507,False,False,0.0008873939797328377,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,2.5944471901386543,100000,100000,97,0.00097,0.001,0.9700000000000001,0.6313703969795534,False,False,0.0008139412278334835,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,3.561978058282741,100000,100000,73,0.00073,0.001,0.73,0.997992127425434,False,False,0.0005954110926155418,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,15.155257113682307,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.116349616308207,100000,100000,73,0.00073,0.001,0.73,0.997992127425434,False,False,0.0005954110926155418,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.478935698447895,100000,100000,73,0.00073,0.001,0.73,0.997992127425434,False,False,0.0005954110926155418,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.247159090909091,100000,100000,61,0.00061,0.001,0.61,0.9999892769027814,False,False,0.0004874912658966328,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.01085531258605,100000,100000,111,0.00111,0.001,1.11,0.14702017398406367,False,False,0.0009426466218526813,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.5758085503243477,100000,100000,174,0.00174,0.001,1.74,1.3017016591279294e-11,False,True,0.0015290148050778865,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.474396144861517,100000,100000,161,0.00161,0.001,1.61,1.2381859031306064e-08,False,True,0.0014072650364131453,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,18.468236450071718,100000,100000,286,0.00286,0.001,2.86,5.5112065203461195e-52,False,True,0.002587969811768287,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.2358373412376555,100000,100000,315,0.00315,0.001,3.15,6.634000201619849e-66,False,True,0.0028642579044364453,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,4.998968616472668,100000,100000,315,0.00315,0.001,3.15,6.634000201619849e-66,False,True,0.0028642579044364453,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,4.752363107892239,100000,100000,326,0.00326,0.001,3.26,1.7109784197764628e-71,False,True,0.0029692245874541837,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,21.403766306919255,100000,100000,307,0.00307,0.001,3.07,6.051984987220313e-62,False,True,0.0027879744753980273,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.6777472954915664,100000,100000,307,0.00307,0.001,3.07,6.051984987220313e-62,False,True,0.0027879744753980273,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,3.4768849588081814,100000,100000,224,0.00224,0.001,2.2399999999999998,1.1047769159980497e-26,False,True,0.0019998661538381153,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,18.468236450071718,100000,100000,286,0.00286,0.001,2.86,5.5112065203461195e-52,False,True,0.002587969811768287,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.2358373412376555,100000,100000,315,0.00315,0.001,3.15,6.634000201619849e-66,False,True,0.0028642579044364453,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,4.998968616472668,100000,100000,315,0.00315,0.001,3.15,6.634000201619849e-66,False,True,0.0028642579044364453,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,4.752363107892239,100000,100000,326,0.00326,0.001,3.26,1.7109784197764628e-71,False,True,0.0029692245874541837,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,21.403766306919255,100000,100000,307,0.00307,0.001,3.07,6.051984987220313e-62,False,True,0.0027879744753980273,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.6777472954915664,100000,100000,307,0.00307,0.001,3.07,6.051984987220313e-62,False,True,0.0027879744753980273,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,3.4768849588081814,100000,100000,224,0.00224,0.001,2.2399999999999998,1.1047769159980497e-26,False,True,0.0019998661538381153,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,19.121620319323455,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.3754347262991655,100000,100000,65,0.00065,0.001,0.6499999999999999,0.9999224825194178,False,False,0.0005233416947303802,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,5.642690138907992,100000,100000,65,0.00065,0.001,0.6499999999999999,0.9999224825194178,False,False,0.0005233416947303802,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,5.511938238315357,100000,100000,52,0.00052,0.001,0.5199999999999999,0.9999999525853837,False,False,0.0004073597462703949,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,21.99180288060517,100000,100000,70,0.0007,0.001,0.7,0.9993424807901062,False,False,0.0005683312737377544,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,2.8163137215602854,100000,100000,184,0.00184,0.001,1.84,3.482155427553327e-14,False,True,0.0016228775429503526,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,3.7032803990902057,100000,100000,87,0.00087,0.001,0.87,0.9140020321376374,False,False,0.0007225197501066658,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,22.63444679726416,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,2.600699206681996,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,6.763636363636365,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,6.519356690210961,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,25.018780824400576,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,2.9997846674466047,100000,100000,91,0.00091,0.001,0.91,0.8287401351069801,False,False,0.000759031777075395,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,3.799377598043902,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,18.61166138188473,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,2.3413871238887096,100000,100000,76,0.00076,0.001,0.76,0.9945460638294342,False,False,0.0006225506197369418,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,5.482093663911845,100000,100000,76,0.00076,0.001,0.76,0.9945460638294342,False,False,0.0006225506197369418,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,5.221604285480481,100000,100000,94,0.00094,0.001,0.94,0.7391451232430026,False,False,0.0007864660897249963,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,20.83121201321214,100000,100000,102,0.00102,0.001,1.02,0.4339517167245074,False,False,0.0008598188007377601,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,2.7245801174566817,100000,100000,237,0.00237,0.001,2.37,1.9561374978597671e-31,False,True,0.0021228414018148946,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,3.6037498507822354,100000,100000,129,0.00129,0.001,1.2899999999999998,0.0030164316878916824,False,False,0.0011091307976005063,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,14.855363280035201,100000,100000,276,0.00276,0.001,2.76,1.7867293978530594e-47,False,True,0.002492859619874347,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.094509803618164,100000,100000,344,0.00344,0.001,3.44,5.540139025225886e-81,False,True,0.003141169844242218,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.386971317452601,100000,100000,344,0.00344,0.001,3.44,5.540139025225886e-81,False,True,0.003141169844242218,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.244417862838915,100000,100000,293,0.00293,0.001,2.9299999999999997,3.1140146531990434e-55,False,True,0.002654598093443808,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.135182615150267,100000,100000,312,0.00312,0.001,3.1199999999999997,2.076162248011969e-64,False,True,0.0028356459714618506,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.6356887888745915,100000,100000,284,0.00284,0.001,2.84,4.5256801532869257e-51,False,True,0.0025689407878360694,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.5998428986000963,100000,100000,129,0.00129,0.001,1.2899999999999998,0.0030164316878916824,False,False,0.0011091307976005063,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,14.400126262072718,100000,100000,137,0.00137,0.001,1.3699999999999999,0.00025649415380748987,False,True,0.00118342984027465,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.0890906954086508,100000,100000,105,0.00105,0.001,1.0499999999999998,0.3215204792326507,False,False,0.0008873939797328377,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,4.364299933643,100000,100000,105,0.00105,0.001,1.0499999999999998,0.3215204792326507,False,False,0.0008873939797328377,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,4.242185635886424,100000,100000,100,0.001,0.001,1.0,0.513318740379552,False,False,0.0008414553099888005,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,17.958200625256687,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,2.6386561077987483,100000,100000,97,0.00097,0.001,0.9700000000000001,0.6313703969795534,False,False,0.0008139412278334835,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,3.46738046264428,100000,100000,135,0.00135,0.001,1.35,0.0004950896024671464,False,True,0.0011648390359851953,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,14.855363280035201,100000,100000,276,0.00276,0.001,2.76,1.7867293978530594e-47,False,True,0.002492859619874347,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.094509803618164,100000,100000,344,0.00344,0.001,3.44,5.540139025225886e-81,False,True,0.003141169844242218,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.386971317452601,100000,100000,344,0.00344,0.001,3.44,5.540139025225886e-81,False,True,0.003141169844242218,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.244417862838915,100000,100000,293,0.00293,0.001,2.9299999999999997,3.1140146531990434e-55,False,True,0.002654598093443808,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.135182615150267,100000,100000,312,0.00312,0.001,3.1199999999999997,2.076162248011969e-64,False,True,0.0028356459714618506,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.6356887888745915,100000,100000,284,0.00284,0.001,2.84,4.5256801532869257e-51,False,True,0.0025689407878360694,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.5998428986000963,100000,100000,129,0.00129,0.001,1.2899999999999998,0.0030164316878916824,False,False,0.0011091307976005063,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,18.60596189885968,100000,100000,68,0.00068,0.001,0.68,0.9997081900530336,False,False,0.0005503131366940415,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.1979586177313197,100000,100000,188,0.00188,0.001,1.88,2.8010305738411925e-15,False,True,0.0016604697725365915,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,4.831022085259373,100000,100000,188,0.00188,0.001,1.88,2.8010305738411925e-15,False,True,0.0016604697725365915,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,4.7,100000,100000,156,0.00156,0.001,1.5599999999999998,1.3259129676039573e-07,False,True,0.0013605270710224792,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,22.121564961901687,100000,100000,97,0.00097,0.001,0.9700000000000001,0.6313703969795534,False,False,0.0008139412278334835,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.6755753693948248,100000,100000,174,0.00174,0.001,1.74,1.3017016591279294e-11,False,True,0.0015290148050778865,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,3.519339339385929,100000,100000,192,0.00192,0.001,1.92,2.0724869708940757e-16,False,True,0.0016980876486920229,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,21.836166829784524,100000,100000,27,0.00027,0.001,0.27,1.0,False,False,0.00019058770590256612,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.5688579296996763,100000,100000,29,0.00029,0.001,0.29,1.0,False,False,0.0002074672977176858,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.599031062980906,100000,100000,29,0.00029,0.001,0.29,1.0,False,False,0.0002074672977176858,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,6.459300699300699,100000,100000,28,0.00028,0.001,0.27999999999999997,1.0,False,False,0.00019901345293242735,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,24.799010244179286,100000,100000,46,0.00046,0.001,0.46,0.9999999994508724,False,False,0.0003544247985711532,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.9521073702544443,100000,100000,78,0.00078,0.001,0.7799999999999999,0.990021453826155,False,False,0.0006406750608723395,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,3.738331764050571,100000,100000,114,0.00114,0.001,1.14,0.09041397024855372,False,False,0.0009703213166298106,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,18.612068421029697,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.2975868994357884,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,5.278905560458958,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,5.005526032770291,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,21.19684081664201,100000,100000,5,5e-05,0.001,0.05,1.0,False,False,1.9701695682116508e-05,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,2.710347128077363,100000,100000,49,0.00049,0.001,0.49,0.9999999944086542,False,False,0.00038083785303653965,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,3.543707592548189,100000,100000,105,0.00105,0.001,1.0499999999999998,0.3215204792326507,False,False,0.0008873939797328377,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,21.537141984220767,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,2.508443738355022,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,6.29228998849252,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,6.1303134916483595,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,23.423570102860847,100000,100000,11,0.00011,0.001,0.11,1.0,False,False,6.169125453387898e-05,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,2.9522808637680455,100000,100000,35,0.00035,0.001,0.35,0.9999999999999815,False,False,0.0002587069081006179,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,3.9867329651105727,100000,100000,32,0.00032,0.001,0.32,0.9999999999999993,False,False,0.00023298349952460438,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,19.839125713874317,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,2.409564132872186,100000,100000,7,7e-05,0.001,0.06999999999999999,1.0,False,False,3.285360286106403e-05,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,5.805999310424089,100000,100000,7,7e-05,0.001,0.06999999999999999,1.0,False,False,3.285360286106403e-05,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,5.6190493997980635,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,22.561767070274733,100000,100000,11,0.00011,0.001,0.11,1.0,False,False,6.169125453387898e-05,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,2.770062189988237,100000,100000,47,0.00047,0.001,0.47,0.9999999987844573,False,False,0.0003632164205626637,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,3.5282114253639847,100000,100000,77,0.00077,0.001,0.7699999999999999,0.992577997787702,False,False,0.0006316097799621529,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,17.107503227141788,100000,100000,7,7e-05,0.001,0.06999999999999999,1.0,False,False,3.285360286106403e-05,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.2835667035091585,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,5.214676889375686,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.978958442924776,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,19.486047844703158,100000,100000,33,0.00033,0.001,0.33,0.999999999999998,False,False,0.0002415363674693854,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.6897990168055723,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.457792920018384,100000,100000,101,0.00101,0.001,1.01,0.47343779814492487,False,False,0.0008506350198094997,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,16.491044401569763,100000,100000,60,0.0006,0.001,0.6,0.9999937132948267,False,False,0.0004785498624899667,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.229796719482332,100000,100000,86,0.00086,0.001,0.86,0.929348600292646,False,False,0.0007134042646368971,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,4.971993410214167,100000,100000,86,0.00086,0.001,0.86,0.929348600292646,False,False,0.0007134042646368971,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,4.855726205831303,100000,100000,74,0.00074,0.001,0.74,0.997162644981469,False,False,0.0006044511478218331,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,19.013950221621574,100000,100000,90,0.0009,0.001,0.8999999999999999,0.8537778207551906,False,False,0.0007498964262102619,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,2.6588662905469835,100000,100000,99,0.00099,0.001,0.99,0.5531992834095408,False,False,0.0008322797326101892,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,3.517187374700698,100000,100000,113,0.00113,0.001,1.13,0.1070823302779727,False,False,0.0009610929633905299,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,15.878802336333923,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.1342334713372835,100000,100000,87,0.00087,0.001,0.87,0.9140020321376374,False,False,0.0007225197501066658,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.554952510176391,100000,100000,87,0.00087,0.001,0.87,0.9140020321376374,False,False,0.0007225197501066658,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.4288412797092445,100000,100000,83,0.00083,0.001,0.83,0.9631784088769153,False,False,0.0006860892783339578,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.56405781137956,100000,100000,107,0.00107,0.001,1.07,0.25464123887085105,False,False,0.0009057967299018748,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.6202643233015523,100000,100000,137,0.00137,0.001,1.3699999999999999,0.00025649415380748987,False,True,0.00118342984027465,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.471866551410146,100000,100000,115,0.00115,0.001,1.15,0.07579450448227279,False,False,0.0009795530646161822,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,21.467734774857743,100000,100000,43,0.00043,0.001,0.43,0.9999999999556446,False,False,0.0003281314669110158,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.478758242395257,100000,100000,35,0.00035,0.001,0.35,0.9999999999999815,False,False,0.0002587069081006179,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.1442424242424245,100000,100000,35,0.00035,0.001,0.35,0.9999999999999815,False,False,0.0002587069081006179,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,5.887211538461539,100000,100000,35,0.00035,0.001,0.35,0.9999999999999815,False,False,0.0002587069081006179,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,23.948302906912048,100000,100000,82,0.00082,0.001,0.82,0.9709946712715295,False,False,0.00067699508852283,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.804985309004675,100000,100000,106,0.00106,0.001,1.0599999999999998,0.2871060533941824,False,False,0.0008965934613523274,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,3.617873026462108,100000,100000,144,0.00144,0.001,1.4400000000000002,2.075409293182591e-05,False,True,0.0012485773710083274,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,21.45149567435023,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.4936282437809005,100000,100000,20,0.0002,0.001,0.2,1.0,False,False,0.00013255032396513553,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.218181818181819,100000,100000,20,0.0002,0.001,0.2,1.0,False,False,0.00013255032396513553,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,5.931858974358975,100000,100000,19,0.00019,0.001,0.19,1.0,False,False,0.00012442297982049658,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,23.602709140856668,100000,100000,34,0.00034,0.001,0.34,0.9999999999999938,False,False,0.0002501111588265553,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.792619382607361,100000,100000,75,0.00075,0.001,0.75,0.9960414198079429,False,False,0.0006134976998226495,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,3.6122282279895246,100000,100000,117,0.00117,0.001,1.17,0.05212776842829249,False,False,0.00099802656642483,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,20.52788199970809,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.5134932769437985,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,6.317648453241673,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,5.976554690959701,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,22.789551034709664,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,2.8447924956957893,100000,100000,59,0.00059,0.001,0.59,0.9999963740380571,False,False,0.00046961736567553204,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,3.607932637135902,100000,100000,71,0.00071,0.001,0.71,0.9990332072650638,False,False,0.000577351014024179,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,20.212507378983304,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,2.427224669354542,100000,100000,36,0.00036,0.001,0.36000000000000004,0.9999999999999462,False,False,0.0002673227178277469,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,5.891419595523266,100000,100000,36,0.00036,0.001,0.36000000000000004,0.9999999999999462,False,False,0.0002673227178277469,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,5.527507526356778,100000,100000,53,0.00053,0.001,0.5299999999999999,0.9999999069807382,False,False,0.0004162229130137077,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,23.131246085210055,100000,100000,32,0.00032,0.001,0.32,0.9999999999999993,False,False,0.00023298349952460438,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,2.8640377450239987,100000,100000,111,0.00111,0.001,1.11,0.14702017398406367,False,False,0.0009426466218526813,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,3.7499999999999996,100000,100000,77,0.00077,0.001,0.7699999999999999,0.992577997787702,False,False,0.0006316097799621529,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,19.3801679324744,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,2.425537427547832,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,5.883231812435353,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,5.606646472956634,100000,100000,3,3e-05,0.001,0.03,1.0,False,False,8.176962810389156e-06,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,22.290302280533922,100000,100000,17,0.00017,0.001,0.17,1.0,False,False,0.00010832420282634642,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,2.8362367995773226,100000,100000,76,0.00076,0.001,0.76,0.9945460638294342,False,False,0.0006225506197369418,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,3.6589450375591586,100000,100000,71,0.00071,0.001,0.71,0.9990332072650638,False,False,0.000577351014024179,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,14.876766510844412,100000,100000,180,0.0018,0.001,1.7999999999999998,3.97512166867521e-13,False,True,0.0015853118002524377,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.0907560826331344,100000,100000,185,0.00185,0.001,1.85,1.8692092320560753e-14,False,True,0.0016322731507251679,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.37126099706745,100000,100000,185,0.00185,0.001,1.85,1.8692092320560753e-14,False,True,0.0016322731507251679,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.21001705641369,100000,100000,181,0.00181,0.001,1.8099999999999998,2.180154324719699e-13,False,True,0.0015947007052504916,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,17.16162032330316,100000,100000,461,0.00461,0.001,4.61,8.053437722305772e-152,False,True,0.004263330804805607,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.537807201392874,100000,100000,321,0.00321,0.001,3.21,6.219664378073006e-69,False,True,0.002921501652533879,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.405260713210426,100000,100000,174,0.00174,0.001,1.74,1.3017016591279294e-11,False,True,0.0015290148050778865,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,16.546994600320335,100000,100000,88,0.00088,0.001,0.88,0.8963598265914079,False,False,0.0007316403295526757,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.2557638167514753,100000,100000,77,0.00077,0.001,0.7699999999999999,0.992577997787702,False,False,0.0006316097799621529,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,5.088470396965182,100000,100000,77,0.00077,0.001,0.7699999999999999,0.992577997787702,False,False,0.0006316097799621529,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,4.952742081880285,100000,100000,65,0.00065,0.001,0.6499999999999999,0.9999224825194178,False,False,0.0005233416947303802,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,19.63307351785695,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,2.716192471777227,100000,100000,83,0.00083,0.001,0.83,0.9631784088769153,False,False,0.0006860892783339578,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,3.6621397577965005,100000,100000,81,0.00081,0.001,0.8099999999999999,0.9774027876742359,False,False,0.0006679064666698508,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,15.47872440128414,100000,100000,5,5e-05,0.001,0.05,1.0,False,False,1.9701695682116508e-05,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.14887379815391,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.617658600392413,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.38262158672469,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.209554601578773,100000,100000,76,0.00076,0.001,0.76,0.9945460638294342,False,False,0.0006225506197369418,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.568060150369641,100000,100000,94,0.00094,0.001,0.94,0.7391451232430026,False,False,0.0007864660897249963,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.505098327538657,100000,100000,110,0.0011,0.001,1.1,0.17044388956125028,False,False,0.0009334287270107033,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,21.396332169393663,100000,100000,205,0.00205,0.001,2.0500000000000003,2.506265040163079e-20,False,True,0.0018205135079863762,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.5162654430460316,100000,100000,201,0.00201,0.001,2.0100000000000002,4.395944110373472e-19,False,True,0.0017828175784823125,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.331591779867642,100000,100000,201,0.00201,0.001,2.0100000000000002,4.395944110373472e-19,False,True,0.0017828175784823125,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,6.000245985170607,100000,100000,193,0.00193,0.001,1.93,1.0670813425485766e-16,False,True,0.0017074960307205563,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,24.118583304291747,100000,100000,100,0.001,0.001,1.0,0.513318740379552,False,False,0.0008414553099888005,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.8564779400253633,100000,100000,122,0.00122,0.001,1.22,0.018025166234512443,False,False,0.0010442667426027107,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,3.71032080108006,100000,100000,109,0.00109,0.001,1.09,0.1962122981744098,False,False,0.0009242144134684189,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,21.021633878200117,100000,100000,153,0.00153,0.001,1.5299999999999998,5.108737656608395e-07,False,True,0.0013325095757108264,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.471464898405188,100000,100000,156,0.00156,0.001,1.5599999999999998,1.3259129676039573e-07,False,True,0.0013605270710224792,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,6.1081387440489685,100000,100000,156,0.00156,0.001,1.5599999999999998,1.3259129676039573e-07,False,True,0.0013605270710224792,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,5.8838510735495655,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,24.80560787036233,100000,100000,153,0.00153,0.001,1.5299999999999998,5.108737656608395e-07,False,True,0.0013325095757108264,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,2.916129946390597,100000,100000,165,0.00165,0.001,1.65,1.6670970682912332e-09,False,True,0.001444691928645634,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,3.632717506391311,100000,100000,161,0.00161,0.001,1.61,1.2381859031306064e-08,False,True,0.0014072650364131453,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,18.996012340712056,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.35458399827557,100000,100000,12,0.00012,0.001,0.12,1.0,False,False,6.92435362795627e-05,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,5.544065804935369,100000,100000,12,0.00012,0.001,0.12,1.0,False,False,6.92435362795627e-05,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,5.378302930826525,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,22.275207035734784,100000,100000,19,0.00019,0.001,0.19,1.0,False,False,0.00012442297982049658,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,2.793768802919904,100000,100000,67,0.00067,0.001,0.67,0.9998096702998127,False,False,0.0005413150546896638,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,3.5676369592215162,100000,100000,80,0.0008,0.001,0.8,0.9825923230144141,False,False,0.0006588235162639599,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,24.186773244895647,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,2.721224594027336,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,7.405063291139241,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,7.120805369127518,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,26.89705402365685,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.0941978938103816,100000,100000,17,0.00017,0.001,0.17,1.0,False,False,0.00010832420282634642,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,3.736997874644876,100000,100000,41,0.00041,0.001,0.41,0.999999999992616,False,False,0.0003106753316732829,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,19.190433222643183,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,2.3813228257235797,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,5.670698400312134,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,5.4385672636401505,100000,100000,7,7e-05,0.001,0.06999999999999999,1.0,False,False,3.285360286106403e-05,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,21.7774556768594,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,2.7194099756814483,100000,100000,75,0.00075,0.001,0.75,0.9960414198079429,False,False,0.0006134976998226495,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,3.5533452725935066,100000,100000,83,0.00083,0.001,0.83,0.9631784088769153,False,False,0.0006860892783339578,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,15.943080573773004,100000,100000,74,0.00074,0.001,0.74,0.997162644981469,False,False,0.0006044511478218331,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.1725856932217553,100000,100000,72,0.00072,0.001,0.7200000000000001,0.9985974799411556,False,False,0.0005863776682239691,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.7201285943918565,100000,100000,72,0.00072,0.001,0.7200000000000001,0.9985974799411556,False,False,0.0005863776682239691,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.556085236211088,100000,100000,67,0.00067,0.001,0.67,0.9998096702998127,False,False,0.0005413150546896638,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.173157027980483,100000,100000,134,0.00134,0.001,1.34,0.0006807995380398071,False,True,0.0011555475698931447,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.581969105973886,100000,100000,133,0.00133,0.001,1.33,0.0009297330820069654,False,True,0.001146258766964133,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.4877605543113948,100000,100000,97,0.00097,0.001,0.9700000000000001,0.6313703969795534,False,False,0.0008139412278334835,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,16.541957672426914,100000,100000,27,0.00027,0.001,0.27,1.0,False,False,0.00019058770590256612,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.2137196851039693,100000,100000,34,0.00034,0.001,0.34,0.9999999999999938,False,False,0.0002501111588265553,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,4.900554844216816,100000,100000,34,0.00034,0.001,0.34,0.9999999999999938,False,False,0.0002501111588265553,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,4.76,100000,100000,34,0.00034,0.001,0.34,0.9999999999999938,False,False,0.0002501111588265553,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,18.384941136866896,100000,100000,62,0.00062,0.001,0.62,0.999982001216915,False,False,0.0004964413568891472,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,2.597425135812815,100000,100000,111,0.00111,0.001,1.11,0.14702017398406367,False,False,0.0009426466218526813,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,3.547972717397503,100000,100000,82,0.00082,0.001,0.82,0.9709946712715295,False,False,0.00067699508852283,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,14.507051576889959,100000,100000,84,0.00084,0.001,0.84,0.9537595284791068,False,False,0.0006951889351744838,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.0649912469122502,100000,100000,75,0.00075,0.001,0.75,0.9960414198079429,False,False,0.0006134976998226495,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,4.264188849824209,100000,100000,75,0.00075,0.001,0.75,0.9960414198079429,False,False,0.0006134976998226495,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,4.063740445885175,100000,100000,71,0.00071,0.001,0.71,0.9990332072650638,False,False,0.000577351014024179,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,18.044893510857353,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.556024776036343,100000,100000,112,0.00112,0.001,1.1199999999999999,0.12591983987513233,False,False,0.0009518680497319098,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,3.415467839220223,100000,100000,114,0.00114,0.001,1.14,0.09041397024855372,False,False,0.0009703213166298106,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,37.00191436489018,100000,100000,199,0.00199,0.001,1.99,1.787819942121048e-18,False,True,0.0017639782702092402,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0277287693046144,100000,100000,320,0.0032,0.001,3.2,2.003715372101591e-68,False,True,0.002911959209974624,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.167141500474834,100000,100000,320,0.0032,0.001,3.2,2.003715372101591e-68,False,True,0.002911959209974624,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.530630975143403,100000,100000,249,0.00249,0.001,2.4899999999999998,4.283777276537859e-36,False,True,0.002236527429494786,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.297771760483066,100000,100000,170,0.0017,0.001,1.7,1.1914374584977882e-10,False,True,0.0014915192749754903,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.5125433304933362,100000,100000,127,0.00127,0.001,1.27,0.005209066474723833,False,False,0.0010905836026567737,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.673452175282961,100000,100000,78,0.00078,0.001,0.7799999999999999,0.990021453826155,False,False,0.0006406750608723395,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,36.38097030041942,100000,100000,1269,0.01269,0.001,12.69,0.0,False,True,0.01211325768731133,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.1038654741949556,100000,100000,883,0.00883,0.001,8.829999999999998,0.0,False,True,0.008348956272653826,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.633980881899477,100000,100000,883,0.00883,0.001,8.829999999999998,0.0,False,True,0.008348956272653826,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.976859464627152,100000,100000,850,0.0085,0.001,8.5,0.0,False,True,0.008028064552896067,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.341478652109885,100000,100000,693,0.00693,0.001,6.930000000000001,0.0,False,True,0.0065041124779319365,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.5633325603392993,100000,100000,395,0.00395,0.001,3.95,5.0222377219488806e-110,False,True,0.003629440027058535,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.610208785372168,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,32.00624938976762,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.9062792917639686,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,8.446459321736075,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,8.671581105925611,100000,100000,6,6e-05,0.001,0.06,1.0,False,False,2.6130459310735403e-05,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,37.81779626426842,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.4102466307181447,100000,100000,23,0.00023,0.001,0.23,1.0,False,False,0.00015719991305332079,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.686662278490887,100000,100000,23,0.00023,0.001,0.23,1.0,False,False,0.00015719991305332079,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,38.490366760182134,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.203011348127789,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,10.259281696235396,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.747328328899025,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,42.34959380251592,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.5538920011219464,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.619774213924169,100000,100000,42,0.00042,0.001,0.42,0.9999999999816853,False,False,0.0003193957801731029,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,34.94686442777568,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.0575998608630424,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.348916909149693,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,9.754428501605922,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,39.07492802296634,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.4141910182841095,100000,100000,8,8e-05,0.001,0.08,1.0,False,False,3.9808828970238586e-05,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.467206308576965,100000,100000,78,0.00078,0.001,0.7799999999999999,0.990021453826155,False,False,0.0006406750608723395,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,25.942404154845274,100000,100000,508,0.00508,0.001,5.08,3.93168518914391e-184,False,True,0.004715878411212193,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.6036663077724396,100000,100000,234,0.00234,0.001,2.34,2.6053850591381987e-30,False,True,0.002094444913752124,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,6.779078242229368,100000,100000,234,0.00234,0.001,2.34,2.6053850591381987e-30,False,True,0.002094444913752124,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,6.991340427395341,100000,100000,269,0.00269,0.001,2.69,2.073519491184882e-44,False,True,0.0024263358607358007,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,29.798050431593833,100000,100000,338,0.00338,0.001,3.3800000000000003,8.979404527922227e-78,False,True,0.003083830570691381,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,3.019845417109678,100000,100000,221,0.00221,0.001,2.21,1.2428467634954497e-25,False,True,0.0019715161983104904,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.0654481736284644,100000,100000,186,0.00186,0.001,1.86,9.980795215362472e-15,False,True,0.0016416704003859887,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,27.161093497869338,100000,100000,205,0.00205,0.001,2.0500000000000003,2.506265040163079e-20,False,True,0.0018205135079863762,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.6750237083376,100000,100000,169,0.00169,0.001,1.6900000000000002,2.0430360071447613e-10,False,True,0.0014821500113325892,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,7.155751840168244,100000,100000,169,0.00169,0.001,1.6900000000000002,2.0430360071447613e-10,False,True,0.0014821500113325892,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,7.347858522029138,100000,100000,188,0.00188,0.001,1.88,2.8010305738411925e-15,False,True,0.0016604697725365915,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,32.44548541491596,100000,100000,107,0.00107,0.001,1.07,0.25464123887085105,False,False,0.0009057967299018748,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,3.174405214244379,100000,100000,88,0.00088,0.001,0.88,0.8963598265914079,False,False,0.0007316403295526757,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,4.210045485343253,100000,100000,97,0.00097,0.001,0.9700000000000001,0.6313703969795534,False,False,0.0008139412278334835,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,26.13410925718852,100000,100000,657,0.00657,0.001,6.57,2.2417691034638976e-298,False,True,0.006155403235723206,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.561235471458063,100000,100000,544,0.00544,0.001,5.44,3.577668340019425e-210,False,True,0.005063058716921657,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,6.5599271402550094,100000,100000,544,0.00544,0.001,5.44,3.577668340019425e-210,False,True,0.005063058716921657,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,6.617722017866527,100000,100000,630,0.0063,0.001,6.3,1.806762600551716e-276,False,True,0.005894079884027829,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,29.498103248142844,100000,100000,390,0.0039,0.001,3.9,4.7981818212661987e-107,False,True,0.0035815050834059996,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,2.9132514732869548,100000,100000,327,0.00327,0.001,3.27,5.213546515467429e-72,False,True,0.00297877129577378,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.117734134987182,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.69911443073252,100000,100000,286,0.00286,0.001,2.86,5.5112065203461195e-52,False,True,0.002587969811768287,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0874555546537885,100000,100000,244,0.00244,0.001,2.44,4.020986396706118e-34,False,True,0.0021891391928746283,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.532381801962533,100000,100000,244,0.00244,0.001,2.44,4.020986396706118e-34,False,True,0.0021891391928746283,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.80674633524538,100000,100000,252,0.00252,0.001,2.52,2.6759175000815076e-37,False,True,0.0022649730468283806,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.43790535246684,100000,100000,177,0.00177,0.001,1.77,2.33196801020118e-12,False,True,0.0015571554074684856,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,38.06463800782383,100000,100000,134,0.00134,0.001,1.34,0.0006807995380398071,False,True,0.0011555475698931447,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.1535828426985573,100000,100000,75,0.00075,0.001,0.75,0.9960414198079429,False,False,0.0006134976998226495,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.945084745762712,100000,100000,75,0.00075,0.001,0.75,0.9960414198079429,False,False,0.0006134976998226495,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,10.039885277246654,100000,100000,125,0.00125,0.001,1.25,0.0087439793559217,False,False,0.0010720479538316862,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.547161956825235,100000,100000,132,0.00132,0.001,1.32,0.0012609207816333232,False,False,0.0011369726572975781,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.5064126031185188,100000,100000,111,0.00111,0.001,1.11,0.14702017398406367,False,False,0.0009426466218526813,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.433626022928787,100000,100000,174,0.00174,0.001,1.74,1.3017016591279294e-11,False,True,0.0015290148050778865,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,34.87477598494362,100000,100000,650,0.0065,0.001,6.5,1.194903837656823e-292,False,True,0.006087635008863492,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0039998061617057,100000,100000,392,0.00392,0.001,3.92,3.1069050628252317e-108,False,True,0.0036006774627977264,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.024014835419564,100000,100000,392,0.00392,0.001,3.92,3.1069050628252317e-108,False,True,0.0036006774627977264,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.328330146590185,100000,100000,310,0.0031,0.001,3.0999999999999996,2.0291490725966178e-63,False,True,0.0028165750960839333,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,38.61225132494805,100000,100000,402,0.00402,0.001,4.0200000000000005,3.0374545268885942e-114,False,True,0.0036965710434693857,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.3398342663787774,100000,100000,287,0.00287,0.001,2.87,1.9131794806058964e-52,False,True,0.002597485608329658,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,39.17312003572518,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.210395413992782,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,10.306638714185883,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,10.581921606118547,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,43.128462593909894,100000,100000,31,0.00031,0.001,0.31,0.9999999999999998,False,False,0.00022445359769546072,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.544110435367,100000,100000,48,0.00048,0.001,0.48,0.9999999973657865,False,False,0.000372020905919944,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.612400606074106,100000,100000,68,0.00068,0.001,0.68,0.9997081900530336,False,False,0.0005503131366940415,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,38.912187465283075,100000,100000,147,0.00147,0.001,1.47,6.397398594539723e-06,False,True,0.0012765341179504224,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.187792397748876,100000,100000,117,0.00117,0.001,1.17,0.05212776842829249,False,False,0.00099802656642483,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,10.162020371145529,100000,100000,117,0.00117,0.001,1.17,0.05212776842829249,False,False,0.00099802656642483,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,10.535991077119187,100000,100000,126,0.00126,0.001,1.26,0.006772968968243766,False,False,0.0010813143176259274,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,43.40416372390359,100000,100000,96,0.00096,0.001,0.96,0.6688983557468624,False,False,0.0008047784317441446,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.61854665616856,100000,100000,91,0.00091,0.001,0.91,0.8287401351069801,False,False,0.000759031777075395,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.5665294797429805,100000,100000,96,0.00096,0.001,0.96,0.6688983557468624,False,False,0.0008047784317441446,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,38.87051153080786,100000,100000,87,0.00087,0.001,0.87,0.9140020321376374,False,False,0.0007225197501066658,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.1699771271936337,100000,100000,133,0.00133,0.001,1.33,0.0009297330820069654,False,True,0.001146258766964133,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,10.048754986930803,100000,100000,133,0.00133,0.001,1.33,0.0009297330820069654,False,True,0.001146258766964133,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,10.427963671128108,100000,100000,90,0.0009,0.001,0.8999999999999999,0.8537778207551906,False,False,0.0007498964262102619,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,43.19886186772363,100000,100000,76,0.00076,0.001,0.76,0.9945460638294342,False,False,0.0006225506197369418,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.570176363583388,100000,100000,93,0.00093,0.001,0.93,0.7713112956834218,False,False,0.0007773166852752068,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.723465456214956,100000,100000,79,0.00079,0.001,0.79,0.9867430787553197,False,False,0.0006497463442293132,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,35.26695809583431,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,3.034605746877639,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,9.208832038982793,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,9.568317776834958,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,38.53707244175344,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.3775502144554523,100000,100000,23,0.00023,0.001,0.23,1.0,False,False,0.00015719991305332079,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.600585032358266,100000,100000,35,0.00035,0.001,0.35,0.9999999999999815,False,False,0.0002587069081006179,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,38.98119204607952,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.1964231807528996,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,10.217121150454483,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.599287343215506,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,43.939677264350024,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.617850248651103,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.768367117136181,100000,100000,33,0.00033,0.001,0.33,0.999999999999998,False,False,0.0002415363674693854,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,36.08358352492169,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.065188049333642,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.395377777777776,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,9.578292137969557,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,40.41921690530502,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.4710469862191844,100000,100000,15,0.00015,0.001,0.15,1.0,False,False,9.246550255877232e-05,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.521575262797564,100000,100000,57,0.00057,0.001,0.57,0.9999988529489707,False,False,0.00045178001126282784,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.75436482015889,100000,100000,19,0.00019,0.001,0.19,1.0,False,False,0.00012442297982049658,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0830747305634167,100000,100000,17,0.00017,0.001,0.17,1.0,False,False,0.00010832420282634642,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.505349794238684,100000,100000,17,0.00017,0.001,0.17,1.0,False,False,0.00010832420282634642,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.791975780752072,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.33567581687875,100000,100000,111,0.00111,0.001,1.11,0.14702017398406367,False,False,0.0009426466218526813,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.490549462587477,100000,100000,117,0.00117,0.001,1.17,0.05212776842829249,False,False,0.00099802656642483,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.465315376836383,100000,100000,146,0.00146,0.001,1.46,9.532359297628069e-06,False,True,0.0012672128526532347,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,36.52202531806435,100000,100000,303,0.00303,0.001,3.0300000000000002,5.348473581752723e-60,False,True,0.0027498510965593315,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,2.987205646279149,100000,100000,390,0.0039,0.001,3.9,4.7981818212661987e-107,False,True,0.0035815050834059996,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,8.923397573162028,100000,100000,390,0.0039,0.001,3.9,4.7981818212661987e-107,False,True,0.0035815050834059996,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.269980879541109,100000,100000,317,0.00317,0.001,3.17,6.575030472767094e-67,False,True,0.002883336231499165,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.74461756008905,100000,100000,122,0.00122,0.001,1.22,0.018025166234512443,False,False,0.0010442667426027107,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4899883487106833,100000,100000,138,0.00138,0.001,1.38,0.00018274019275752834,False,True,0.0011927291204294756,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.424890338817067,100000,100000,180,0.0018,0.001,1.7999999999999998,3.97512166867521e-13,False,True,0.0015853118002524377,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,34.405668137677544,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.995219451703486,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,8.971339563862928,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,9.109089944845142,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,38.37023586062509,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.3545051165524282,100000,100000,29,0.00029,0.001,0.29,1.0,False,False,0.0002074672977176858,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.3197501043295805,100000,100000,97,0.00097,0.001,0.9700000000000001,0.6313703969795534,False,False,0.0008139412278334835,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,37.72598573927526,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.117965111300255,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,9.721706435285611,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.040108323831245,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,42.527218175120346,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.5712373424200092,100000,100000,3,3e-05,0.001,0.03,1.0,False,False,8.176962810389156e-06,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.862972974543695,100000,100000,11,0.00011,0.001,0.11,1.0,False,False,6.169125453387898e-05,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,35.043068739290895,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.0452778762217623,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.273717343405728,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,9.392291579388354,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,38.68806878957215,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.449278764142164,100000,100000,5,5e-05,0.001,0.05,1.0,False,False,1.9701695682116508e-05,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.4575751658651885,100000,100000,55,0.00055,0.001,0.55,0.9999996613959555,False,False,0.00043398115157923815,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,38.05839810957191,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.17460994727609,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,10.078148317344297,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,10.380987890376037,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.99632920466582,100000,100000,17,0.00017,0.001,0.17,1.0,False,False,0.00010832420282634642,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.5470310978169595,100000,100000,32,0.00032,0.001,0.32,0.9999999999999993,False,False,0.00023298349952460438,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.608609080012125,100000,100000,66,0.00066,0.001,0.66,0.999877638932687,False,False,0.0005323245165649081,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,326,0.00326,0.001,3.26,1.7109784197764628e-71,False,True,0.0029692245874541837,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,241,0.00241,0.001,2.4099999999999997,5.843607252578901e-33,False,True,0.0021607192116219593,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,241,0.00241,0.001,2.4099999999999997,5.843607252578901e-33,False,True,0.0021607192116219593,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,238,0.00238,0.001,2.3800000000000003,8.183304287260489e-32,False,True,0.0021323091728973863,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,172,0.00172,0.001,1.72,3.9830303635974706e-11,False,True,0.0015102633772296982,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,145,0.00145,0.001,1.45,1.4111464584176117e-05,False,True,0.0012578939292375955,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,84,0.00084,0.001,0.84,0.9537595284791068,False,False,0.0006951889351744838,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,34.215737120025146,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.9830363125453254,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,8.898505641964015,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,8.973154433602033,100000,100000,4,4e-05,0.001,0.04,1.0,False,False,1.3663295579801311e-05,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,37.35561091277543,100000,100000,1,1e-05,0.001,0.01,1.0,False,False,5.129328125488575e-07,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.325696503470788,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.351450682531699,100000,100000,80,0.0008,0.001,0.8,0.9825923230144141,False,False,0.0006588235162639599,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,37.85311523947974,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.152476906940043,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,9.93811064879026,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.248232611174458,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,42.39089637219405,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.5357425697843703,100000,100000,10,0.0001,0.001,0.1,1.0,False,False,5.425502627693371e-05,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.631383652502895,100000,100000,49,0.00049,0.001,0.49,0.9999999944086542,False,False,0.00038083785303653965,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,36.416571319478535,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.1086063453444255,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.663433410315626,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,10.03951612903226,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,41.4648589025638,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.5531748844989837,100000,100000,14,0.00014,0.001,0.13999999999999999,1.0,False,False,8.464129496997781e-05,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.810359418957979,100000,100000,23,0.00023,0.001,0.23,1.0,False,False,0.00015719991305332079,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.47043865685439,100000,100000,253,0.00253,0.001,2.5300000000000002,1.053384103510433e-37,False,True,0.0022744569934778722,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.6758003102092416,100000,100000,262,0.00262,0.001,2.6199999999999997,2.007285465933844e-41,False,True,0.0023598580252729364,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,7.159907300115875,100000,100000,262,0.00262,0.001,2.6199999999999997,2.007285465933844e-41,False,True,0.0023598580252729364,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,7.248686284813452,100000,100000,362,0.00362,0.001,3.6199999999999997,6.996867985116622e-91,False,True,0.0033133253936707525,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,31.484236418518126,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,3.1032214218900513,100000,100000,122,0.00122,0.001,1.22,0.018025166234512443,False,False,0.0010442667426027107,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.218674551270663,100000,100000,90,0.0009,0.001,0.8999999999999999,0.8537778207551906,False,False,0.0007498964262102619,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,27.177196323388475,100000,100000,136,0.00136,0.001,1.36,0.0003575735054375322,False,True,0.0011741331356164293,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.677848723585365,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,7.170873786407768,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,7.42026505178164,100000,100000,62,0.00062,0.001,0.62,0.999982001216915,False,False,0.0004964413568891472,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,32.04314427827106,100000,100000,64,0.00064,0.001,0.64,0.9999516203506734,False,False,0.0005143667687544135,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,3.193472247268015,100000,100000,49,0.00049,0.001,0.49,0.9999999944086542,False,False,0.00038083785303653965,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,4.210225090913697,100000,100000,77,0.00077,0.001,0.7699999999999999,0.992577997787702,False,False,0.0006316097799621529,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.577164466275352,100000,100000,280,0.0028,0.001,2.8,2.9257137876184688e-49,False,True,0.0025308931438041042,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.687014073986208,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,7.220044633799959,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,7.395369153967419,100000,100000,244,0.00244,0.001,2.44,4.020986396706118e-34,False,True,0.0021891391928746283,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,31.15158789807397,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,3.0942011642770098,100000,100000,143,0.00143,0.001,1.43,3.0323596758091897e-05,False,True,0.0012392632036728377,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.24203141868976,100000,100000,101,0.00101,0.001,1.01,0.47343779814492487,False,False,0.0008506350198094997,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,154,0.00154,0.001,1.5399999999999998,3.27907059412469e-07,False,True,0.0013418465862262224,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,152,0.00152,0.001,1.52,7.909586161330005e-07,False,True,0.0013231747478840105,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,154,0.00154,0.001,1.5399999999999998,3.27907059412469e-07,False,True,0.0013418465862262224,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,152,0.00152,0.001,1.52,7.909586161330005e-07,False,True,0.0013231747478840105,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,34.215737120025146,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.9830363125453254,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,8.898505641964015,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,8.973154433602033,100000,100000,3,3e-05,0.001,0.03,1.0,False,False,8.176962810389156e-06,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,37.35561091277543,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.325696503470788,100000,100000,44,0.00044,0.001,0.44,0.9999999998950494,False,False,0.0003368818615559863,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.351450682531699,100000,100000,79,0.00079,0.001,0.79,0.9867430787553197,False,False,0.0006497463442293132,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,37.85311523947974,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.152476906940043,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,9.93811064879026,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.248232611174458,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,42.39089637219405,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.5357425697843703,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.631383652502895,100000,100000,40,0.0004,0.001,0.4,0.9999999999970949,False,False,0.00030197068632448345,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,36.416571319478535,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.1086063453444255,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.663433410315626,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,10.03951612903226,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,41.4648589025638,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.5531748844989837,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.810359418957979,100000,100000,29,0.00029,0.001,0.29,1.0,False,False,0.0002074672977176858,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.577164466275352,100000,100000,280,0.0028,0.001,2.8,2.9257137876184688e-49,False,True,0.0025308931438041042,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.687014073986208,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,7.220044633799959,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,7.395369153967419,100000,100000,244,0.00244,0.001,2.44,4.020986396706118e-34,False,True,0.0021891391928746283,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,31.15158789807397,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,3.0942011642770098,100000,100000,143,0.00143,0.001,1.43,3.0323596758091897e-05,False,True,0.0012392632036728377,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.24203141868976,100000,100000,101,0.00101,0.001,1.01,0.47343779814492487,False,False,0.0008506350198094997,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,27.177196323388475,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.677848723585365,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,7.170873786407768,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,7.42026505178164,100000,100000,93,0.00093,0.001,0.93,0.7713112956834218,False,False,0.0007773166852752068,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,32.04314427827106,100000,100000,69,0.00069,0.001,0.69,0.9995589050989415,False,False,0.0005593185965031169,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,3.193472247268015,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,4.210225090913697,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.577164466275352,100000,100000,280,0.0028,0.001,2.8,2.9257137876184688e-49,False,True,0.0025308931438041042,1.0
+tail_antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.687014073986208,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+tail_antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,7.220044633799959,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+tail_antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,7.395369153967419,100000,100000,244,0.00244,0.001,2.44,4.020986396706118e-34,False,True,0.0021891391928746283,1.0
+tail_antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,31.15158789807397,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+tail_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,3.0942011642770098,100000,100000,143,0.00143,0.001,1.43,3.0323596758091897e-05,False,True,0.0012392632036728377,1.0
+tail_antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.24203141868976,100000,100000,101,0.00101,0.001,1.01,0.47343779814492487,False,False,0.0008506350198094997,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,154,0.00154,0.001,1.5399999999999998,3.27907059412469e-07,False,True,0.0013418465862262224,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,152,0.00152,0.001,1.52,7.909586161330005e-07,False,True,0.0013231747478840105,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,154,0.00154,0.001,1.5399999999999998,3.27907059412469e-07,False,True,0.0013418465862262224,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,152,0.00152,0.001,1.52,7.909586161330005e-07,False,True,0.0013231747478840105,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,34.215737120025146,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.9830363125453254,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,8.898505641964015,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,8.973154433602033,100000,100000,3,3e-05,0.001,0.03,1.0,False,False,8.176962810389156e-06,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,37.35561091277543,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.325696503470788,100000,100000,44,0.00044,0.001,0.44,0.9999999998950494,False,False,0.0003368818615559863,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.351450682531699,100000,100000,79,0.00079,0.001,0.79,0.9867430787553197,False,False,0.0006497463442293132,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,37.85311523947974,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.152476906940043,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,9.93811064879026,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.248232611174458,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,42.39089637219405,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.5357425697843703,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.631383652502895,100000,100000,40,0.0004,0.001,0.4,0.9999999999970949,False,False,0.00030197068632448345,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,36.416571319478535,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.1086063453444255,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.663433410315626,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,10.03951612903226,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,41.4648589025638,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.5531748844989837,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.810359418957979,100000,100000,29,0.00029,0.001,0.29,1.0,False,False,0.0002074672977176858,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.577164466275352,100000,100000,280,0.0028,0.001,2.8,2.9257137876184688e-49,False,True,0.0025308931438041042,1.0
+antares_vs_rnd_antares,Excess Variability Smoothed,antares,antares_hp,2.687014073986208,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+antares_vs_rnd_antares,Fano Excess Local Variability,antares,antares_hp,7.220044633799959,100000,100000,197,0.00197,0.001,1.97,7.128428161872269e-18,False,True,0.0017451448494189528,1.0
+antares_vs_rnd_antares,Fano Excess Global Variability,antares,antares_hp,7.395369153967419,100000,100000,244,0.00244,0.001,2.44,4.020986396706118e-34,False,True,0.0021891391928746283,1.0
+antares_vs_rnd_antares,Variability Excess Adjacent,antares,antares_hp,31.15158789807397,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares,antares_hp,3.0942011642770098,100000,100000,143,0.00143,0.001,1.43,3.0323596758091897e-05,False,True,0.0012392632036728377,1.0
+antares_vs_rnd_antares,Odd even contrast,antares,antares_hp,4.24203141868976,100000,100000,101,0.00101,0.001,1.01,0.47343779814492487,False,False,0.0008506350198094997,1.0
+rnd_antares_vs_rnd_antares,Excess Variability,antares_hp,antares_hp_hp,27.177196323388475,100000,100000,164,0.00164,0.001,1.64,2.776717597505789e-09,False,True,0.0014353322370307552,1.0
+rnd_antares_vs_rnd_antares,Excess Variability Smoothed,antares_hp,antares_hp_hp,2.677848723585365,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Local Variability,antares_hp,antares_hp_hp,7.170873786407768,100000,100000,121,0.00121,0.001,1.21,0.02261373087233077,False,False,0.0010350124209111999,1.0
+rnd_antares_vs_rnd_antares,Fano Excess Global Variability,antares_hp,antares_hp_hp,7.42026505178164,100000,100000,93,0.00093,0.001,0.93,0.7713112956834218,False,False,0.0007773166852752068,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Adjacent,antares_hp,antares_hp_hp,32.04314427827106,100000,100000,69,0.00069,0.001,0.69,0.9995589050989415,False,False,0.0005593185965031169,1.0
+rnd_antares_vs_rnd_antares,Variability Excess Smoothed Adjacent,antares_hp,antares_hp_hp,3.193472247268015,100000,100000,63,0.00063,0.001,0.63,0.9999702616584889,False,False,0.0005053999247959053,1.0
+rnd_antares_vs_rnd_antares,Odd even contrast,antares_hp,antares_hp_hp,4.210225090913697,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+tail_antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.577164466275352,100000,100000,280,0.0028,0.001,2.8,2.9257137876184688e-49,False,True,0.0025308931438041042,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,154,0.00154,0.001,1.5399999999999998,3.27907059412469e-07,False,True,0.0013418465862262224,1.0
+anisogen2_vs_rnd_anisogen,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,152,0.00152,0.001,1.52,7.909586161330005e-07,False,True,0.0013231747478840105,1.0
+anisogen2_vs_rnd_anisogen,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability,anisogen2,anisogen2_hp,36.676059403012935,100000,100000,158,0.00158,0.001,1.58,5.230723534668653e-08,False,True,0.0013792160365405284,1.0
+anisogen2_vs_rnd_anisogen2,Excess Variability Smoothed,anisogen2,anisogen2_hp,3.0619207843141103,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Local Variability,anisogen2,anisogen2_hp,9.375358889414734,100000,100000,178,0.00178,0.001,1.7799999999999998,1.3001104418157117e-12,False,True,0.0015665391368989451,1.0
+anisogen2_vs_rnd_anisogen2,Fano Excess Global Variability,anisogen2,anisogen2_hp,9.677676864244743,100000,100000,173,0.00173,0.001,1.73,2.2834246493895535e-11,False,True,0.0015196381834428182,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Adjacent,anisogen2,anisogen2_hp,41.2673628681945,100000,100000,154,0.00154,0.001,1.5399999999999998,3.27907059412469e-07,False,True,0.0013418465862262224,1.0
+anisogen2_vs_rnd_anisogen2,Variability Excess Smoothed Adjacent,anisogen2,anisogen2_hp,3.4570730151434526,100000,100000,152,0.00152,0.001,1.52,7.909586161330005e-07,False,True,0.0013231747478840105,1.0
+anisogen2_vs_rnd_anisogen2,Odd even contrast,anisogen2,anisogen2_hp,4.624107389108249,100000,100000,103,0.00103,0.001,1.03,0.3952402597006317,False,False,0.0008690065930647554,1.0
+antares_vs_anisogen,Excess Variability,antares,anisogen,34.215737120025146,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen,Excess Variability Smoothed,antares,anisogen,2.9830363125453254,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Local Variability,antares,anisogen,8.898505641964015,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen,Fano Excess Global Variability,antares,anisogen,8.973154433602033,100000,100000,3,3e-05,0.001,0.03,1.0,False,False,8.176962810389156e-06,1.0
+antares_vs_anisogen,Variability Excess Adjacent,antares,anisogen,37.35561091277543,100000,100000,9,9e-05,0.001,0.09000000000000001,1.0,False,False,4.695305126357296e-05,1.0
+antares_vs_anisogen,Variability Excess Smoothed Adjacent,antares,anisogen,3.325696503470788,100000,100000,44,0.00044,0.001,0.44,0.9999999998950494,False,False,0.0003368818615559863,1.0
+antares_vs_anisogen,Odd even contrast,antares,anisogen,4.351450682531699,100000,100000,79,0.00079,0.001,0.79,0.9867430787553197,False,False,0.0006497463442293132,1.0
+antares_vs_anisogen2,Excess Variability,antares,anisogen2,37.85311523947974,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Excess Variability Smoothed,antares,anisogen2,3.152476906940043,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Local Variability,antares,anisogen2,9.93811064879026,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Fano Excess Global Variability,antares,anisogen2,10.248232611174458,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_anisogen2,Variability Excess Adjacent,antares,anisogen2,42.39089637219405,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_anisogen2,Variability Excess Smoothed Adjacent,antares,anisogen2,3.5357425697843703,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_anisogen2,Odd even contrast,antares,anisogen2,4.631383652502895,100000,100000,40,0.0004,0.001,0.4,0.9999999999970949,False,False,0.00030197068632448345,1.0
+antares_vs_isogen,Excess Variability,antares,isogen,36.416571319478535,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Excess Variability Smoothed,antares,isogen,3.1086063453444255,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Local Variability,antares,isogen,9.663433410315626,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Fano Excess Global Variability,antares,isogen,10.03951612903226,100000,100000,0,0.0,0.001,0.0,1.0,False,False,0.0,1.0
+antares_vs_isogen,Variability Excess Adjacent,antares,isogen,41.4648589025638,100000,100000,2,2e-05,0.001,0.02,1.0,False,False,3.5536265581777322e-06,1.0
+antares_vs_isogen,Variability Excess Smoothed Adjacent,antares,isogen,3.5531748844989837,100000,100000,16,0.00016,0.001,0.16,1.0,False,False,0.00010036205835321854,1.0
+antares_vs_isogen,Odd even contrast,antares,isogen,4.810359418957979,100000,100000,29,0.00029,0.001,0.29,1.0,False,False,0.0002074672977176858,1.0
+antares_vs_rnd_antares,Excess Variability,antares,antares_hp,27.577164466275352,100000,100000,280,0.0028,0.001,2.8,2.9257137876184688e-49,False,True,0.0025308931438041042,1.0

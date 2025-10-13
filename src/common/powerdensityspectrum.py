@@ -24,10 +24,12 @@ def exp_count_per_sec(lambda_nm, A: float, lambda_0: float, sigma: float, C: flo
     return A * np.exp(-log_term) + C
 
 
-def compute_spectrum_params(
+def compute_spectrum_params_old(
     meta: FitsMetadata, pp: ProcessingParameters, source_data: DataFrame
 ) -> tuple[Spectrum, float]:
     try:
+        print(source_data.columns)
+
         assert (
             "Wavelength Center" in source_data.columns
         ), "Compute spectrum params require the source_data to be cut on wavelength bins"
@@ -77,6 +79,79 @@ def compute_spectrum_params(
 
         traceback.print_exc()
         raise Exception("Spectrum fitting failed.") from e
+
+
+def compute_spectrum_params(meta, pp, source_data):
+    # Preconditions
+    assert (
+        "Wavelength Center" in source_data.columns
+    ), "source_data must be pre-binned by wavelength"
+    assert "Wavelength Width" in source_data.columns, "missing 'Wavelength Width'"
+
+    duration = get_duration(meta, pp)
+
+    # Group -> flux density
+    grouped = (
+        source_data.groupby(["Wavelength Center", "Wavelength Width"])
+        .size()
+        .reset_index(name="Count")
+    )
+    grouped = grouped.sort_values("Wavelength Center").reset_index(drop=True)
+
+    lam = grouped["Wavelength Center"].to_numpy(dtype=float)  # nm
+    w = grouped["Wavelength Width"].to_numpy(dtype=float)  # nm
+    k = grouped["Count"].to_numpy(dtype=float)
+
+    # Flux density and its Poisson stdev
+    y = k / (duration * w)
+    y_sigma = np.where(k > 0, np.sqrt(k) / (duration * w), 1.0 / (duration * w))
+
+    # Initial guesses (robust-ish)
+    # Weighted median for lambda0
+    weights = y / (y_sigma + 1e-12)
+    weights = np.clip(weights, 0, np.percentile(weights, 95))  # cap extremes
+    cdf = np.cumsum(weights) / (weights.sum() + 1e-12)
+    lam0_guess = np.interp(0.5, cdf, lam)
+
+    y_min, y_max = float(np.min(y)), float(np.max(y))
+    C_guess = np.percentile(y, 10)
+    A_guess = max(y_max - C_guess, y_max * 0.25)
+    sigma_guess = 0.15  # dimensionless log-width; tune per instrument
+
+    # Bounds: lambda0 within data range; sigma in plausible log-range
+    lam_lo, lam_hi = float(lam.min()), float(lam.max())
+    bounds_lo = [0.0, max(lam_lo * 0.9, 1e-6), 0.03, 0.0]
+    bounds_hi = [np.inf, lam_hi * 1.1, 0.7, np.inf]
+
+    # Fit
+    popt, pcov = curve_fit(
+        exp_count_per_sec,
+        lam,
+        y,
+        p0=[A_guess, lam0_guess, sigma_guess, C_guess],
+        bounds=(bounds_lo, bounds_hi),
+        sigma=y_sigma,
+        absolute_sigma=True,
+        maxfev=20000,
+    )
+    A_fit, lambda_0_fit, sigma_fit, C_fit = map(float, popt)
+
+    fitted = exp_count_per_sec(lam, *popt)
+    resid = y - fitted
+    ss_res = float(np.sum(resid**2))
+    ss_tot = float(np.sum((y - y.mean()) ** 2))
+    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else np.nan
+
+    # Diagnostics: flag “flat” solutions
+    flatish = (sigma_fit > 0.65) or (A_fit < 0.1 * (C_fit + 1e-12))
+    if flatish:
+        print(
+            "[warn] Spectrum fit is nearly flat. "
+            f"sigma={sigma_fit:.3f}, A={A_fit:.3g}, C={C_fit:.3g}. "
+            "Consider a power-law fit or tighter sigma bounds."
+        )
+
+    return Spectrum(A_fit, lambda_0_fit, sigma_fit, C_fit), r2
 
 
 def compute_spectrum_params_2(

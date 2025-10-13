@@ -1,6 +1,7 @@
 import json
 from common.fitsmetadata import (
     FitsMetadata,
+    ChunkVariabilityMetadata,
     ComparePipeline,
     ProcessingParameters,
     GenerationParameters,
@@ -17,7 +18,10 @@ def load_fits_metadata(id: str) -> FitsMetadata:
     Read JSON data from a file and reconstruct a FitsMetadata object.
     """
     assert id is not None, "Cannot load Fits metadata for id None"
-    filename = f"meta_files/fits/meta_{id}.json"
+    filename = f"meta_files/fits/{id}.json"
+    file_exists = os.path.isfile(filename)
+    if not file_exists:
+        return None
     print(f"Loading Fits file {filename}")
     with open(filename, "r") as f:
         data = json.load(f)
@@ -43,6 +47,9 @@ def load_fits_metadata(id: str) -> FitsMetadata:
     if "alpha" not in data:
         data["alpha"] = 1.0
 
+    if "ascore" not in data:
+        data["ascore"] = None
+
     # if "synthetic_twin_event_file" not in data:
     #    data["synthetic_twin_event_file"] = ""
     if data["apparent_spectrum"] is not None:
@@ -63,6 +70,7 @@ def load_fits_metadata(id: str) -> FitsMetadata:
         # resolution=data["resolution"],
         max_energy=data["max_energy"],
         min_energy=data["min_energy"],
+        t_min=data["t_min"],
         gen_id=data["gen_id"],
         # wavelength_bins=data["wavelength_bins"],
         # time_bin_seconds=data["time_bin_seconds"],
@@ -73,9 +81,35 @@ def load_fits_metadata(id: str) -> FitsMetadata:
         source_count=data["source_count"],
         # anullus_radius_inner=data["anullus_radius_inner"],
         # anullus_radius_outer=data["anullus_radius_outer"],
+        ascore=data["ascore"],
         star=data["star"],
         t_max=data["t_max"],
         apparent_spectrum=spectrum,
+    )
+
+    return metadata
+
+
+def load_chunk_metadata(id: str) -> ChunkVariabilityMetadata:
+    """
+    Read JSON data from a file and reconstruct a ChunkVariabilityMetadata object.
+    """
+    assert id is not None, "Cannot load ChunkVariability metadata for id None"
+    filename = f"meta_files/chunk_variability/{id}.json"
+    print(f"Loading ChunkVariability file {filename}")
+
+    if not os.path.isfile(filename):
+        print(f"File {filename} was not on disk!")
+        return False
+    with open(filename, "r") as f:
+        data = json.load(f)
+
+    metadata = ChunkVariabilityMetadata(
+        id=data["id"],
+        source_meta_id=data["source_meta_id"],
+        pp_id=data["pp_id"],
+        fits_meta_hash=data["fits_meta_hash"],
+        pp_meta_hash=data["pp_meta_hash"],
     )
 
     return metadata
@@ -86,7 +120,7 @@ def save_pipeline(metadata: ComparePipeline) -> None:
     Serialize the ComparePipeline object to JSON and write it to a file.
     """
     # Convert the dataclass to a dictionary
-    path = f"meta_files/pipeline/{metadata.id}_pipe.json"
+    path = f"meta_files/pipeline/{metadata.id}.json"
     # file_exists = os.path.isfile(csv_path)
 
     with open(path, "w") as f:
@@ -101,7 +135,7 @@ def save_gen_param(metadata: GenerationParameters) -> None:
     Serialize the GenerationParameters object to JSON and write it to a file.
     """
     # Convert the dataclass to a dictionary
-    path = f"meta_files/generation/{metadata.id}_gen.json"
+    path = f"meta_files/generation/{metadata.id}.json"
 
     with open(path, "w") as f:
         # Write the dictionary in a human-readable (pretty-printed) way
@@ -115,7 +149,7 @@ def save_processing_metadata(metadata: ProcessingParameters) -> None:
     Serialize the ProcessingParameters object to JSON and write it to a file.
     """
     # Convert the dataclass to a dictionary
-    path = f"meta_files/processing/{metadata.id}_pparam.json"
+    path = f"meta_files/processing/{metadata.id}.json"
 
     with open(path, "w") as f:
         # Write the dictionary in a human-readable (pretty-printed) way
@@ -124,43 +158,91 @@ def save_processing_metadata(metadata: ProcessingParameters) -> None:
     print(f"Saved Processing Parameters metadata : {path}")
 
 
-def save_fits_metadata(metadata: FitsMetadata) -> None:
+def save_chunk_metadata(metadata: ChunkVariabilityMetadata) -> None:
     """
     Serialize the FitsMetadata object to JSON and write it to a file.
     """
     # Convert the dataclass to a dictionary
-    path = f"meta_files/fits/meta_{metadata.id}.json"
+
     # file_exists = os.path.isfile(csv_path)
-    if not metadata.t_max:
-        metadata.t_max = 0
+
+    with open(metadata.get_metafile_path(), "w") as f:
+        # Write the dictionary in a human-readable (pretty-printed) way
+        json.dump(metadata.dict(), f, indent=4)
+    print(f"Saved chunk-variability-metadata : {metadata.get_metafile_path()}")
+    return True
+
+
+def save_fits_metadata(meta: FitsMetadata) -> None:
+    """
+    Serialize the FitsMetadata object to JSON and write it to a file.
+    """
+    # Convert the dataclass to a dictionary
+    path = f"meta_files/fits/{meta.id}.json"
+    # file_exists = os.path.isfile(csv_path)
+    if not meta.t_max:
+        meta.t_max = 0
     else:
-        metadata.t_max = int(metadata.t_max)
+        meta.t_max = int(meta.t_max)
 
     with open(path, "w") as f:
         # Write the dictionary in a human-readable (pretty-printed) way
-        json.dump(metadata.dict(), f, indent=4)
+        json.dump(meta.dict(), f, indent=4)
     print(f"Saved fits-metadata : {path}")
     return True
 
 
 def load_processing_param(id) -> ProcessingParameters:
-    path = f"meta_files/processing/{id}_pparam.json"
+    path = f"meta_files/processing/{id}.json"
     is_file = os.path.isfile(path)
     if is_file:
         with open(path, "r") as f:
             data = json.load(f)
+
+            if "padding_strategy" not in data:
+                data["padding_strategy"] = False
+            if "downsample_strategy" not in data:
+                data["downsample_strategy"] = None
+            if "downsample_target_count" not in data:
+                data["downsample_target_count"] = None
+
+            if "time_bins_from" not in data:
+                data["time_bins_from"] = None
+            if "time_bins_to" not in data:
+                data["time_bins_to"] = None
+            if "time_bin_widths_count" not in data:
+                data["time_bin_widths_count"] = 1
+            if "time_bin_chunk_length" not in data:
+                data["time_bin_chunk_length"] = 12
+            if "take_top_variability_count" not in data:
+                data["take_top_variability_count"] = 10
+            if "phase_bins" not in data:
+                data["phase_bins"] = 12
+
             metadata = ProcessingParameters(
                 id=data["id"],
                 source_radius=data["source_radius"],
                 processed_filename=data["processed_filename"],
                 wavelength_bins=data["wavelength_bins"],
                 resolution=data["resolution"],
+                time_bin_chunk_length=data["time_bin_chunk_length"],
+                time_bin_widths_count=data["time_bin_widths_count"],
+                time_bins_from=data["time_bins_from"],
+                time_bins_to=data["time_bins_to"],
                 max_wavelength=data["max_wavelength"],
                 min_wavelength=data["min_wavelength"],
                 time_bin_seconds=data["time_bin_seconds"],
                 anullus_radius_inner=data["anullus_radius_inner"],
                 anullus_radius_outer=data["anullus_radius_outer"],
                 take_time_seconds=data["take_time_seconds"],
+                padding_strategy=data["padding_strategy"],
+                downsample_strategy=data["downsample_strategy"],
+                downsample_target_count=data["downsample_target_count"],
+                variability_type=data.get("variability_type", "neighbour"),
+                percentile=data.get("percentile", None),
+                chunk_counts=data.get("chunk_counts", 100000),
+                take_top_variability_count=data["take_top_variability_count"],
+                phase_bins=data["phase_bins"],
             )
         assert metadata.id == id, "What - the file and internal id has diverged"
         return metadata
@@ -177,94 +259,99 @@ def load_all_in_pipeline(id: str):
             id=id, A_fits_id=data["fits_id"], pp_id=data["pp_id"], gen_id=["gen_id"]
         )
 
-    fitsmeta = load_fits_metadata(f"meta_files/fits/meta_{pipe.A_fits_id}.json")
-    processing_meta = load_processing_param("meta_files/processing/{id}_pparam.json")
-    gen_meta = load_gen_param("meta_files/generation/{id}_gen.json")
+    fitsmeta = load_fits_metadata(f"meta_files/fits/{pipe.A_fits_id}.json")
+    processing_meta = load_processing_param("meta_files/processing/{id}.json")
+    gen_meta = load_gen_param("meta_files/generation/{id}.json")
 
     return pipe, fitsmeta, processing_meta, gen_meta
 
 
 def load_best_metadata(A_meta_id: str) -> tuple[FitsMetadata, GenerationParameters]:
-    best_gen_param = None
-    print("Loading experiment scores:")
-    print("-- Try to find the experiment that most closely matched the data")
-    summaries = load_summaries("temp/parameter_search.csv", A_meta_id)
+    try:
+        best_gen_param = None
+        print("Loading experiment scores:")
+        print("-- Try to find the experiment that most closely matched the data")
+        summaries = load_summaries("temp/parameter_search.csv", A_meta_id)
 
-    if len(summaries) == 0:
+        if len(summaries) == 0:
+            print(
+                "Oops. We must stop here, there are no valid synthetic datasets to explore for a match. Try running parameter_search.py"
+            )
+            exit(100)
+
+        best = find_best_match(summaries)
+
+        for i in range(0, min(100, len(best))):
+            row = best.iloc[i]
+            b_gen_id = row["B_gen_id"]
+            genmeta_file = f"meta_files/generation/{b_gen_id}.json"
+            print(genmeta_file)
+            exists = os.path.isfile(genmeta_file)
+            if exists:
+                print(f"\n Best genemeta experiment found: {b_gen_id}")
+                best_gen_param = load_gen_param(id=b_gen_id)
+            else:
+                print(
+                    f"Wanted to fetch meta {b_gen_id} but the file {genmeta_file} was not found, moving on to next"
+                )
+                continue
+
+            meta_file = f"meta_files/fits/{row['B_id']}.json"
+            exists = os.path.isfile(meta_file)
+            if exists:
+                print(f"\n Best generated data found: {row['B_id']}")
+                best_meta = load_fits_metadata(id=row["B_id"])
+            else:
+                print(
+                    f"Wanted to fetch meta {row['B_id']} but the file {meta_file} was not found, moving on to next"
+                )
+                continue
+
+            if best_gen_param is None:
+                raise Exception(
+                    "Could not find any best generation params to compare with. Have you deleted al the generation/[].json files?"
+                )
+            if best_meta is None:
+                raise Exception(
+                    "Could not find any best metadata to compare with. Have you deleted al the fits/meta_[].json files?"
+                )
+
+            return best_meta, best_gen_param
+
+    except Exception as e:
         print(
-            "Oops. We must stop here, there are no valid synthetic datasets to explore for a match. Try running parameter_search.py"
+            f"Could not find any best experiment. Try running parametersearch to generate more",
+            e,
         )
-        exit(100)
-
-    best = find_best_match(summaries)
-
-    for i in range(0, min(100, len(best))):
-        row = best.iloc[i]
-        b_gen_id = row["B_gen_id"]
-        genmeta_file = f"meta_files/generation/{b_gen_id}_gen.json"
-        print(genmeta_file)
-        exists = os.path.isfile(genmeta_file)
-        if exists:
-            print(f"\n Best genemeta experiment found: {b_gen_id}")
-            best_gen_param = load_gen_param(id=b_gen_id)
-        else:
-            print(
-                f"Wanted to fetch meta {b_gen_id} but the file {genmeta_file} was not found, moving on to next"
-            )
-            continue
-
-        meta_file = f"meta_files/fits/meta_{row['B_id']}.json"
-        exists = os.path.isfile(meta_file)
-        if exists:
-            print(f"\n Best generated data found: {row['B_id']}")
-            best_meta = load_fits_metadata(id=row["B_id"])
-        else:
-            print(
-                f"Wanted to fetch meta {row['B_id']} but the file {meta_file} was not found, moving on to next"
-            )
-            continue
-
-        if best_gen_param is None:
-            raise Exception(
-                f"Could not find any best generation params to compare with. Have you deleted al the generation/[]_gen.json files?"
-            )
-        if best_meta is None:
-            raise Exception(
-                f"Could not find any best metadata to compare with. Have you deleted al the fits/meta_[].json files?"
-            )
-
-        return best_meta, best_gen_param
-
-    raise Exception(
-        f"Could not find any best experiment. Try running parametersearch to generate more"
-    )
 
 
 def load_pipeline(id) -> ComparePipeline:
     print("Current working directory:", os.getcwd())
 
-    filename = f"{os.getcwd()}/meta_files/pipeline/{id}_pipe.json"
+    filename = f"{os.getcwd()}/meta_files/pipeline/{id}.json"
     is_file = os.path.isfile(filename)
 
     if is_file:
         with open(filename, "r") as f:
             data = json.load(f)
+            if "downsample_str" not in data:
+                data["downsample_str"] = None
+
             metadata = ComparePipeline(
                 id=data["id"],
                 A_fits_id=data["A_fits_id"],
                 B_fits_id=data["B_fits_id"],
                 pp_id=data["pp_id"],
                 gen_id=data["gen_id"],
-                downsample_N=data["downsample_N"],
             )
         return metadata
     else:
-        filename = f"../meta_files/pipeline/{id}_pipe.json"
+        filename = f"../meta_files/pipeline/{id}.json"
         return None
 
 
 def load_gen_param(id) -> GenerationParameters:
-    path = f"meta_files/generation/{id}_gen.json"
+    path = f"meta_files/generation/{id}.json"
     is_file = os.path.isfile(path)
     if is_file:
         with open(path, "r") as f:
@@ -285,8 +372,10 @@ def load_gen_param(id) -> GenerationParameters:
                 id=data["id"],
                 alpha=data["alpha"],
                 lucretius=data["lucretius"],
+                theta_change_per_sec=data.get("theta_change_per_sec", 0.0),
                 r_e=data["r_e"],
                 theta=data["theta"],
+                t_min=data["t_min"],
                 t_max=data["t_max"],
                 perp=data["perp"],
                 phase=data["phase"],

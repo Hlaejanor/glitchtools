@@ -18,7 +18,7 @@ If you can make a file called plot_{something}_flickerfit_RV_norm_100s.png, and 
 
 ## Process
 1. Ensure that meta_1.json correspond to the Chandra dataset you want to analyze. Adjust binning settings etc to your liking
-2. Run parametersearch.py. This will generate datasets based on param_cobmos. Each dataset gets a unique meta_{id}.json file and a summary written to temp/parameter_search.csv
+2. Run parametersearch.py. This will generate datasets based on param_cobmos. Each dataset gets a unique {id}.json file and a summary written to temp/parameter_search.csv
 3. With a few examples generated, you may run readandplotchandra.py. This will generate plots annotated with the experiment id.
 4. Leave parameter_search running.py
 

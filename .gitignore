@@ -1,4 +1,5 @@
 venv
+*.mp4
 fits/*
 cleanup
 temp/*

@@ -1,16 +1,23 @@
 import numpy as np
 import pandas as pd
-from .lanesheetMetadata import LanesheetMetadata
+from common.lanesheetMetadata import LanesheetMetadata
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from common.fitsmetadata import FitsMetadata, GenerationParameters, ProcessingParameters
+from common.fitsmetadata import (
+    ComparePipeline,
+    FitsMetadata,
+    GenerationParameters,
+    ProcessingParameters,
+)
 import os
 from pandas import DataFrame
 
+import csv
+import os
 
-def ensure_plot_folder_exists(meta: FitsMetadata):
-    path = f"plots/{meta.id}"
+
+def ensure_path_exists(path: str):
     try:
         if os.path.isdir(path):
             return True
@@ -23,6 +30,33 @@ def ensure_plot_folder_exists(meta: FitsMetadata):
         raise Exception(f"Error creating folder {path}", repr(e))
 
 
+def ensure_pipeline_folders_exists(meta: ComparePipeline):
+    path = f"plots/{meta.id}"
+    path2 = "files"
+    success = True
+    try:
+        if os.path.isdir(path):
+            print(f"Creating folder")
+            success = True
+        else:
+            print(f"Creating folder")
+            os.mkdir(path)
+            success = True
+        if os.path.isdir(path2):
+            print(f"Creating folder {path}")
+            success = True
+        else:
+            print(f"Creating folder {path2}")
+            os.mkdir(path2)
+            success = True
+        return success
+
+    except Exception as e:
+        print(f"Failed to create {path}")
+        raise Exception(f"Error creating folder {path}", repr(e))
+        return False
+
+
 def get_duration(meta: FitsMetadata, pp: ProcessingParameters):
     if pp.take_time_seconds:
         assert (
@@ -30,7 +64,7 @@ def get_duration(meta: FitsMetadata, pp: ProcessingParameters):
         ), f"Cannot take first {pp.take_time_seconds} seconds, because it is more than total length of {meta.t_max} seconds"
         duration = pp.take_time_seconds
     else:
-        duration = meta.t_max
+        duration = meta.t_max - meta.t_min
 
     return duration
 
@@ -46,6 +80,32 @@ def get_wavelength_bins(pp: ProcessingParameters):
     wave_widths = np.diff(wave_edges)
 
     return wave_edges, wave_centers, wave_widths
+
+
+def get_uneven_time_bin_widths(pp: ProcessingParameters):
+    # Using the ProcessingParameters, figure out what to do
+    if pp.time_bin_widths_count is None or pp.take_time_seconds == 1:
+        print("Using only one time-bin width")
+        bin_widths = [pp.time_bin_seconds]
+    else:
+        print("Generating unevenly spaced ")
+        t_bin_width_range = pp.time_bins_to - pp.time_bins_from
+        t_bin_width_increment = t_bin_width_range / pp.time_bin_widths_count
+        bin_widths = np.zeros(pp.time_bin_widths_count)
+        bin_widths[0] = pp.time_bins_from
+        for i in range(
+            1,
+            pp.time_bin_widths_count,
+        ):
+            bin_widths[i] = bin_widths[i - 1] + (
+                t_bin_width_increment * np.random.uniform(0.7, 1.3)
+            )
+
+        print(
+            f"Using {pp.time_bin_widths_count} widths, ranging from {pp.time_bins_from} to {pp.time_bins_to} seconds"
+        )
+
+    return bin_widths
 
 
 def compare_variability_profiles(
@@ -106,6 +166,7 @@ def compare_variability_profiles(
         "alpha": B_gen.alpha,
         "theta": B_gen.theta,
         "lucretius": B_gen.lucretius,
+        "theta_change_per_sec": B_gen.theta_change_per_sec,
         "B_gen_id": B_gen.id if B_gen else None,
         "A_gen_id": A_gen.id if A_gen else None,
         "Peak λ real": peak_wavelength_real,
@@ -127,10 +188,27 @@ def compare_variability_profiles(
 
 
 def estimate_lanecount_fast(ls: LanesheetMetadata):
+    """
+    Estimate the expected number of lightlanes in a cross section.
+
+    Parameters
+    ----------
+    ls : LanesheetMetadata
+        Metadata object containing lane parameters (r_e, alpha, lucretius, lambda_center).
+
+    Returns
+    -------
+    float
+        Estimated count of lightlanes based on geometric and physical parameters.
+    """
+    # Size of the lightlane cross section
     area_lane = np.pi * ls.r_e**2
+    # Grid size : Increases with alpha and falls off with stronger negative lucretius parameter
     g = ls.alpha * np.exp(ls.lucretius * ls.lambda_center)
-    area_cell = (np.sqrt(3) / 2) * g**2
-    return area_lane / area_cell
+    # Area between lightlane center is a hexagonal grid. Each hexagon has an area equal to
+    g_hex_cell = (np.sqrt(3) / 2) * g**2
+    # Expected lightlane count is equal to the share of the lightlane cross section divided by the hex cell
+    return area_lane / g_hex_cell
 
 
 def rho_empirical(lambda_nm, A=385, lambda_0=0.38, sigma=0.77, C=5.0):
@@ -315,6 +393,49 @@ def randomly_sample_from(dataset, count: int, seed=None):
     )
 
 
+def read_from_csv(filename) -> DataFrame:
+    """
+    Append a result dict to a CSV file.
+    Creates the file with headers if it doesn't exist.
+    """
+    data = pd.read_csv(filename)
+    return data
+
+
+def write_as_latex_table(df: DataFrame, columns_keep, column_labels, filename):
+    file_exists = os.path.isfile(filename)
+
+    table_str = df.to_latex(
+        columns=columns_keep,
+        header=column_labels,
+        float_format="%.2e",
+        escape=True,
+    )
+    with open(filename, mode="w", newline="") as f:
+        f.write(table_str)
+
+
+def write_result_to_csv(result: dict, filename):
+    """
+    Append a result dict to a CSV file.
+    Creates the file with headers if it doesn't exist.
+    """
+    # Flatten tuple/list entries (like ci95_p_hat) into two separate columns
+    flat_result = result.copy()
+    if isinstance(flat_result.get("ci95_p_hat"), (tuple, list)):
+        flat_result["ci95_p_hat_low"], flat_result["ci95_p_hat_high"] = flat_result.pop(
+            "ci95_p_hat"
+        )
+
+    file_exists = os.path.isfile(filename)
+
+    with open(filename, mode="a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=flat_result.keys())
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(flat_result)
+
+
 def split_into_time_bins(dataset, bins=100, seed=None):
     t_min = dataset["relative_time"].min()
     t_max = dataset["relative_time"].max()
@@ -322,7 +443,7 @@ def split_into_time_bins(dataset, bins=100, seed=None):
 
     dataset["time_bin"] = pd.cut(dataset["relative_time"], bins=bin_edges, labels=False)
 
-    # Group by the "time bin" column and get row indices for each bin
+    # Group by the "time_bin" column and get row indices for each bin
     bin_indices = [group.index.to_numpy() for _, group in dataset.groupby("time_bin")]
 
     return bin_indices

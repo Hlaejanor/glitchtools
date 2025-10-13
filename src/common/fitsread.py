@@ -1,24 +1,23 @@
 import numpy as np
 from astropy.io import fits
-import tabulate
 import os
-from astropy.table import Table, TableGroups
+from astropy.table import Table
 import pandas as pd
 import matplotlib.pyplot as plt
-from common.fitsmetadata import FitsMetadata, ProcessingParameters, GenerationParameters
+from common.fitsmetadata import (
+    FitsMetadata,
+    ChunkVariabilityMetadata,
+    ProcessingParameters,
+    GenerationParameters,
+)
 from datetime import datetime
 from common.metadatahandler import (
     load_fits_metadata,
     save_fits_metadata,
+    save_chunk_metadata,
     load_processing_param,
 )
 from pandas import DataFrame
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
-import uuid
-
-from astropy.io import fits
-import numpy as np
 import uuid
 
 
@@ -64,21 +63,26 @@ def generate_metadata_from_fits(
         )
 
 
-def fits_file_exists(filename):
-    filename = str.replace(filename, "//", "/")
+def get_cached_filename(
+    stage: str, meta: FitsMetadata, pp: ProcessingParameters
+) -> tuple[bool, str]:
+    cache_filename = f"cache/{stage}_{meta.id}_{pp.id}_h{meta.get_hash()[0:8]}{pp.get_hash()[0:8]}.fits"
 
-    fits_file = f"fits/{filename}"
+    if os.path.exists(f"fits/{cache_filename}"):
+        exists = True
+    else:
+        exists = False
+    return exists, cache_filename
 
-    file_exists = os.path.isfile(fits_file)
 
-    return file_exists
-
-
-def fits_read(fits_file) -> DataFrame:
+def fits_read_cache_if_exists(cache_filename_path) -> DataFrame:
     # Path to the FITS file (update this with the correct path)
-    print(f"Attempting to open {fits_file}")
-    # Open the FITS file
-    with fits.open(fits_file) as hdul:
+    print(f"Attempting to open {cache_filename_path}")
+
+    # Silly but efficient recover from stupid path error
+    if cache_filename_path[0:5] == "fits/":
+        cache_filename_path = cache_filename_path[5:]
+    with fits.open(f"fits/{cache_filename_path}") as hdul:
         hdul.info()
 
         # Access the data table
@@ -93,9 +97,52 @@ def fits_read(fits_file) -> DataFrame:
     # Convert the FITS data to an Astropy Table
     table = Table(event_data)
     names = [name for name in table.colnames if len(table[name].shape) <= 1]
-    table.sort("time")
+    if "time" in table.colnames:
+        table.sort("time")
     df = table[names].to_pandas()
 
+    # Print the first 20 row
+    return df
+
+
+def fits_file_exists(filename):
+    filename = str.replace(filename, "//", "/")
+
+    fits_file = f"fits/{filename}"
+
+    file_exists = os.path.isfile(fits_file)
+
+    return file_exists
+
+
+def fits_read(fits_file) -> DataFrame:
+    # Path to the FITS file (update this with the correct path)
+    print(f"Attempting to open {fits_file}")
+    try:
+        # Silly but efficient recover from stupid path error
+        if fits_file[0:5] == "fits/":
+            fits_file = fits_file[5:]
+        with fits.open(f"fits/{fits_file}") as hdul:
+            hdul.info()
+
+            # Access the data table
+            event_data = hdul[1].data  # Events are typically in the second HDU
+
+            # Print column names and the first few rows
+            print("Columns in the event file:")
+            print(event_data.names)
+            # print("\nFirst 20 rows:")
+            # print(event_data[:20])
+
+        # Convert the FITS data to an Astropy Table
+        table = Table(event_data)
+        names = [name for name in table.colnames if len(table[name].shape) <= 1]
+        if "time" in table.colnames:
+            table.sort("time")
+        df = table[names].to_pandas()
+
+    except Exception as e:
+        return None
     # Print the first 20 row
     return df
 
@@ -110,11 +157,11 @@ def crop_chandra_data(data, pos, radius):
     return croppped_data, np.pi * radius**2
 
 
-def mask_chandra_data(data, bright_pixel_array, radius):
-    print(f"Removing hits close to existing sources")
-    combined = data["Hit"] == True
+def mask_event_data(data, bright_pixel_array, radius):
+    print("Removing hits close to existing sources")
+    combined = data["Hit"] == 1
     for pix in bright_pixel_array:
-        print(f"Processing bright pixel {pix} with radius {radius}")
+        print(f"Removing bright pixel {pix} with radius {radius}")
         outside_x = np.abs(data["CCD X"] - pix[0]) > radius
         combined = np.logical_and(combined, outside_x)
         outside_y = np.abs(data["CCD Y"] - pix[1]) > radius
@@ -147,22 +194,25 @@ def find_bright_pixels(data, n=5):
 
     # 2. Group by (CCD X, CCD Y) and count
     pixel_counts = hits.groupby(["CCD X", "CCD Y"]).size().reset_index(name="Counts")
-
+    print(f"Lenth of groups {len(pixel_counts)}")
     # 3. Sort in descending order by "Counts"
     pixel_counts_sorted = pixel_counts.sort_values(by="Counts", ascending=False)
 
     print("Inspecting the top 10 pixels counts")
     print(pixel_counts_sorted[0:10])
-    # Get the CCD X and CCD Y values as lists
-    ccd_x_values = pixel_counts_sorted["CCD X"].tolist()
-    ccd_y_values = pixel_counts_sorted["CCD Y"].tolist()
-    counts = pixel_counts_sorted["Counts"].tolist()
+    if len(pixel_counts_sorted) < n:
+        print(
+            f"ERROR : Cannot return that many bright pixels, only have {len(pixel_counts_sorted)} groups"
+        )
     u = []
-    for x, y, c in zip(ccd_x_values, ccd_y_values, counts):
-        if c > n:
-            u.append(np.array([x, y, c]))
-        else:
-            break
+    for i in range(0, min(n, len(pixel_counts_sorted))):
+        u.append(
+            [
+                pixel_counts_sorted.iloc[i]["CCD X"],
+                pixel_counts_sorted.iloc[i]["CCD Y"],
+                pixel_counts_sorted.iloc[i]["Counts"],
+            ]
+        )
 
     return u
 
@@ -200,7 +250,7 @@ def chandra_time(chandra_timestamp):
     chandra_epoch = 883609200  # 1998 Jan 1
 
     if chandra_timestamp < chandra_epoch:
-        raise Exception(f"This cannot be chandra timestamp, before the epoch")
+        raise Exception("This cannot be chandra timestamp, before the epoch")
 
 
 def pi_channel_to_wavelength_and_width(pi_channel):
@@ -248,8 +298,37 @@ def chandra_like_pi_mapping(wavelength_nm, fwhm_eV=100.0):
     return pi_channels
 
 
-from astropy.table import Table
-import os
+def fits_save_cache(filename: str, df: DataFrame) -> bool:
+    """
+    Save FITS file from a pandas DataFrame by converting it to an Astropy Table.
+
+    Parameters:
+    - events: DataFrame with columns: [time, x, y, wavelength_nm]
+    - meta: FitsMetadata
+
+    Returns:
+    - Updated meta with file path and source count.
+    """
+    print(f"Caching to {filename}")
+    if not os.path.isdir("fits/cache"):
+        os.mkdir("fits/cache")
+
+    assert len(df) > 0, "Events DataFrame is empty"
+    if filename[0:5] == "fits/":
+        filename = filename[5:]
+    filepath = os.path.join("fits/", filename)
+
+    try:
+        # Convert to Astropy Table
+        table = Table.from_pandas(df)
+
+        # Save as FITS
+        table.write(filepath, format="fits", overwrite=True)
+
+        return True
+
+    except Exception as e:
+        raise Exception(f"Error saving FITS metadata: {e}")
 
 
 def fits_save(events: DataFrame, meta: FitsMetadata) -> FitsMetadata:
@@ -263,6 +342,8 @@ def fits_save(events: DataFrame, meta: FitsMetadata) -> FitsMetadata:
     Returns:
     - Updated meta with file path and source count.
     """
+    print("These are the column names")
+    print(events.columns)
     assert len(events) > 0, "Events DataFrame is empty"
     if meta.synthetic:
         filename = f"./fits/synthetic_lightlane/{meta.id}.fits"
@@ -292,9 +373,64 @@ def fits_save(events: DataFrame, meta: FitsMetadata) -> FitsMetadata:
         raise Exception(f"Error saving FITS metadata: {e}")
 
 
-def fits_save_from_generated(events, genmeta: GenerationParameters) -> FitsMetadata:
+def fits_save_chunk_analysis(
+    variability_chunks: DataFrame, source_meta: FitsMetadata, pp: ProcessingParameters
+) -> ChunkVariabilityMetadata:
     """
-    Save synthetic photon events to a FITS file with chandra like pi-mappintg to mitigate quantization artifacts in the low-energy regime.
+    Save chunk analysis dataset
+
+    Parameters:
+    - events: list or array of shape (N, 4) with columns:
+        [time, x, y, wavelength_nm]
+    - filename: output FITS filename (will be placed in ./fits/)
+    """
+    assert len(variability_chunks) > 0, "Events array was empty"
+
+    chunk_meta_id = f"{source_meta.id}_{pp.id}"
+
+    filename = f"fits/chunk_variability/{chunk_meta_id}.fits"
+    print(f"Saving dataset {chunk_meta_id} ({len(variability_chunks)}) obs)")
+    try:
+        # bec1777ec69438f8fe65ba3adf01ab704f20477e4949250cdbc502ee9da08e6f
+        #
+        # Create FITS table from pandas DataFrame (use classmethod to preserve columns)
+        if isinstance(variability_chunks, pd.DataFrame):
+            event_table = Table.from_pandas(variability_chunks)
+        else:
+            # fallback: construct directly if it's already in a suitable format
+            event_table = Table(variability_chunks)
+
+        chunkmetadata = ChunkVariabilityMetadata(
+            id=chunk_meta_id,
+            source_meta_id=source_meta.id,
+            pp_id=pp.id,
+            fits_meta_hash=source_meta.get_hash(),
+            pp_meta_hash=pp.get_hash(),
+        )
+        save_chunk_metadata(chunkmetadata)
+        # Save events to fits file
+        print(f"Writing {filename} with {len(event_table)} events")
+        event_table.write(filename, format="fits", overwrite=True)
+
+        return chunkmetadata
+    except Exception as e:
+        raise Exception("Error saving fitsmetadata ", e)
+        print(f" Exception : {repr(e)}")
+
+
+def fits_save_event_file(event_data: FitsMetadata, meta: FitsMetadata):
+    event_table = Table.from_pandas(event_data)
+
+    event_table.write(meta.raw_event_file, format="fits", overwrite=True)
+
+    return meta
+
+
+def fits_save_events_generated(
+    events, genmeta: GenerationParameters, use_this_id: str = None
+) -> FitsMetadata:
+    """
+    Save synthetic or modified photon events to a FITS file with chandra like pi-mappintg to mitigate quantization artifacts in the low-energy regime.
 
     Parameters:
     - events: list or array of shape (N, 4) with columns:
@@ -302,8 +438,10 @@ def fits_save_from_generated(events, genmeta: GenerationParameters) -> FitsMetad
     - filename: output FITS filename (will be placed in ./fits/)
     """
     assert len(events) > 0, "Events array was empty"
-    meta_id = str(uuid.uuid4())[:8]  # unique short id
-
+    if use_this_id is None:
+        meta_id = str(uuid.uuid4())[:8]  # unique short id
+    else:
+        meta_id = use_this_id
     filename = f"fits/synthetic_lightlane/{meta_id}_gen.fits"
     print(
         f"Saving dataset {meta_id} ({len(events)}) obs. Used Generation Params {genmeta.id})"
@@ -332,8 +470,10 @@ def fits_save_from_generated(events, genmeta: GenerationParameters) -> FitsMetad
             min_energy=genmeta.get_minimum_energh(),
             source_count=len(events),
             star=genmeta.star,
+            t_min=genmeta.t_min,
             t_max=genmeta.t_max,
             gen_id=genmeta.id,
+            ascore=None,
         )
         save_fits_metadata(fitsmeta)
         # Save to FITS
@@ -342,7 +482,7 @@ def fits_save_from_generated(events, genmeta: GenerationParameters) -> FitsMetad
 
         return fitsmeta
     except Exception as e:
-        raise Exception(f"Error saving fitsmetadata ", e)
+        raise Exception("Error saving fitsmetadata ", e)
         print(f" Exception : {repr(e)}")
 
 
@@ -474,7 +614,7 @@ def crop_and_project_to_CCD(
     # maxradius = (int(np.max([pparams.anullus_radius_outer, pparams.source_radius])),)
     if len(filtered_table) == 0:
         return False, fitsmeta, None
-        raise Exception(f"Table got filtered empty")
+        raise Exception("Table got filtered empty")
 
     if fitsmeta.synthetic:
         clamp_time = False
@@ -495,64 +635,41 @@ def crop_and_project_to_CCD(
 
     # fitsmeta.source_count = len(virtual_ccd_data)
     # processed_filename = f"temp/m{fitsmeta.id}_pp{pparams.id}.csv"
-    if not fitsmeta.synthetic:
-        print(f"The dataset is the real deal, crop!")
-        # virtual_ccd_data.to_csv(f"temp/raw_{meta.source_filename}", index=False)
-        # print(f"Brightest pixel found at location [{brightest_pixels[0][0]:.0f}, {brightest_pixels[0][1]:.0f}]")
-        if fitsmeta.source_pos_x and fitsmeta.source_pos_y:
-            center = [int(fitsmeta.source_pos_x), int(fitsmeta.source_pos_y)]
-        else:
-            print(
-                f"WARNING : Asusming that the radius cropping is from the center position"
-            )
-            center = np.array([pparams.resolution / 2, pparams.resolution / 2])
-        cropped_ccd_data, source_area = crop_chandra_data(
-            virtual_ccd_data,
-            center,
-            pparams.source_radius,
-        )
-        if len(cropped_ccd_data) == 0:
-            raise Exception(f"Cropped ccd_data was empty!")
 
-        print(f"Size before removing bright sources {len(cropped_ccd_data)}. ")
-        brightest_pixels = find_bright_pixels(cropped_ccd_data, 1000)
-        masked_ccd_data = mask_chandra_data(cropped_ccd_data, brightest_pixels, 3)
-        if len(masked_ccd_data) == 0:
-            raise Exception(f"Masked ccd_data was empty!")
-        print(f"Size after removing bright sources {len(masked_ccd_data)}. ")
-
-        # print(f"Expects at least {take_target[2]} for pixel at x:{meta.source_pos_x}, y:{meta.source_pos_y}")
-        # fitsmeta.cropped_count = len(cropped_ccd_data)
-
-        print(
-            f"Masking and cropping {fitsmeta.star} data set with {len(masked_ccd_data)} observations, reduction {fitsmeta.get_kept_percent(len(cropped_ccd_data)):.2f}%"
-        )
-
-        # masked_ccd_data.to_csv(processed_filename, index=False)
-
+    # virtual_ccd_data.to_csv(f"temp/raw_{meta.source_filename}", index=False)
+    # print(f"Brightest pixel found at location [{brightest_pixels[0][0]:.0f}, {brightest_pixels[0][1]:.0f}]")
+    if fitsmeta.source_pos_x and fitsmeta.source_pos_y:
+        center = [int(fitsmeta.source_pos_x), int(fitsmeta.source_pos_y)]
     else:
-        print(f"The dataset is synthetically generated, do not crop")
-        # virtual_ccd_data.to_csv(processed_filename, index=False)
-        # fitsmeta.cropped_count = len(virtual_ccd_data)
-
-    # bkg_df, annullus_area = compute_background_flux(
-    #    meta,
-    #    virtual_ccd_data,
-    # )
-
-    # bkg_df.to_csv(meta.background_filename, index=False)
-    # Save metadata about the processing, including the area of the annulus
-
-    # Save to CSV or inspect the first rows
-
-    return (
-        True,
-        fitsmeta,
-        masked_ccd_data if not fitsmeta.synthetic else virtual_ccd_data,
+        print("WARNING : Asusming that the radius cropping is from the center position")
+        center = np.array([pparams.resolution / 2, pparams.resolution / 2])
+    cropped_ccd_data, source_area = crop_chandra_data(
+        virtual_ccd_data,
+        center,
+        pparams.source_radius,
     )
+    if len(cropped_ccd_data) == 0:
+        raise Exception("Cropped ccd_data was empty!")
+
+    print(f"Size before removing bright sources {len(cropped_ccd_data)}. ")
+    brightest_pixels = find_bright_pixels(cropped_ccd_data, 1000)
+    masked_ccd_data = mask_event_data(cropped_ccd_data, brightest_pixels, 3)
+    if len(masked_ccd_data) == 0:
+        raise Exception("Masked ccd_data was empty!")
+    print(f"Size after removing bright sources {len(masked_ccd_data)}. ")
+
+    # print(f"Expects at least {take_target[2]} for pixel at x:{meta.source_pos_x}, y:{meta.source_pos_y}")
+    # fitsmeta.cropped_count = len(cropped_ccd_data)
+
+    print(
+        f"Masking and cropping {fitsmeta.star} data set with {len(masked_ccd_data)} observations, reduction {fitsmeta.get_kept_percent(len(cropped_ccd_data)):.2f}%"
+    )
+
+    return (True, fitsmeta, masked_ccd_data)
 
 
 def read_process_twin_file(meta: FitsMetadata) -> tuple[bool, pd.DataFrame]:
+    print(f"Processing synthetic twin file {meta.synthetic_twin_event_file}")
     event_table = fits_read(meta.synthetic_twin_event_file)
 
     save_fits_metadata(meta)
@@ -562,7 +679,7 @@ def read_process_twin_file(meta: FitsMetadata) -> tuple[bool, pd.DataFrame]:
     return crop_and_project_to_CCD(fitsmeta=meta, event_table=event_table)
 
 
-def read_crop_and_project_to_ccd(
+def read_event_data_crop_and_project_to_ccd(
     fits_id: str, processing_param_id: str
 ) -> tuple[bool, FitsMetadata, ProcessingParameters, DataFrame]:
     fits_meta = load_fits_metadata(fits_id)
@@ -585,6 +702,6 @@ def read_crop_and_project_to_ccd(
         fitsmeta=fits_meta, pparams=pp, event_table=event_table
     )
 
-    save_fits_metadata(metadata=meta)
+    save_fits_metadata(meta=meta)
 
     return success, fits_meta, pp, events
