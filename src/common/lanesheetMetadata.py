@@ -4,9 +4,20 @@ import numpy as np
 import os
 
 
+def nm_to_lightseconds_scalar(lambda_nm: float):
+    """
+    Return the scalar K that converts nanometers to light-seconds.
+    Formula: K = (1e-9 m) / c
+    """
+    c = 299_792_458  # speed of light in m/s (exact by definition)
+    beta = 1e-9 / c
+    return beta * lambda_nm
+
+
 @dataclass
 class LanesheetMetadata:
     id: int
+    empirical: bool
     truth: bool  # True if the data is used to generate a dataset, false if it summarises an estimate
     lambda_center: float
     lambda_width: float
@@ -17,12 +28,19 @@ class LanesheetMetadata:
     # theta: float
     perp: float
     phase: float
-    alpha_tolernace: float = None
+    alpha_tolerance: float = None
     lucretius_tolerance: float = None
     r_e_tolerance: float = None
     theta_tolerance: float = None
     perp_tolerance: float = None
     phase_tolerance: float = None
+    velocity: float = 0.12
+
+    def lambda_center_ls(self):
+        return nm_to_lightseconds_scalar(self.lambda_center)
+
+    def lambda_width_ls(self):
+        return nm_to_lightseconds_scalar(self.lambda_width)
 
     def dict(self):
         return {k: v for k, v in asdict(self).items()}
@@ -30,6 +48,7 @@ class LanesheetMetadata:
     def make_estimate_meta(self, new_id):
         est = LanesheetMetadata(
             id=new_id,
+            empirical=False,
             truth=False,
             data_file=self.data_file,
             lambda_center=self.lambda_center,
@@ -44,6 +63,7 @@ class LanesheetMetadata:
             theta_tolerance=self.theta_tolerance,
             g_tolerance=self.g_tolerance,
             offset_tolerance=self.offset_tolerance,
+            velocity=self.velocity,
         )
         return est
 
@@ -79,6 +99,7 @@ def load_lanesheet_metadata(filename: str) -> LanesheetMetadata:
     metadata = LanesheetMetadata(
         id=data["id"],
         truth=data["truth"],
+        empirical=data["empirical"],
         data_file=data["data_file"],
         lambda_center=data["lambda_center"],
         lambda_width=data["lambda_width"],

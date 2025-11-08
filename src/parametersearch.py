@@ -12,7 +12,7 @@ from common.fitsread import (
     load_fits_metadata,
     save_fits_metadata,
     load_processing_param,
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     read_event_data_crop_and_project_to_ccd,
     chandra_like_pi_mapping,
 )
@@ -26,10 +26,7 @@ from event_processing.var_analysis_plots import (
     binning_process,
     experiment_exists,
 )
-from common.generate_data import (
-    generate_synthetic_telescope_data,
-    generate_synth_if_need_be,
-)
+from common.generate_data import generate_synthetic_telescope_data
 import csv
 import os
 import sys
@@ -112,6 +109,7 @@ def refine_search(
         id="template",
         alpha=1.0,
         lucretius=-1,
+        velocity=1,
         theta_change_per_sec=0.0,
         r_e=1,
         theta=0.2,
@@ -164,7 +162,9 @@ def refine_search(
             # Generate + process synthetic data
             print(f"Fits file {genmeta.raw_event_file}")
             events = generate_synthetic_telescope_data(genmeta)
-            new_fits_meta = fits_save_events_generated(events=events, genmeta=genmeta)
+            new_fits_meta = fits_save_events_with_pi_channel(
+                events=events, genmeta=genmeta
+            )
             (
                 success,
                 new_fits_meta,
@@ -288,6 +288,7 @@ def parameter_search(
         id="template",
         alpha=1.0,
         lucretius=-1,
+        velocity=1.0,
         theta_change_per_sec=0.0,
         r_e=1,
         theta=0.2,
@@ -314,7 +315,7 @@ def parameter_search(
         for genmeta in genmetas:
             synth_data = generate_synthetic_telescope_data(genmeta)
 
-            new_fits_meta = fits_save_events_generated(
+            new_fits_meta = fits_save_events_with_pi_channel(
                 events=synth_data, genmeta=genmeta
             )
             (

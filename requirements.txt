@@ -10,7 +10,9 @@ tabulate
 numpy
 pandas
 matplotlib
+plotly
 scikit-learn
 imageio-ffmpeg
 argparse
 amplpy
+asyncio

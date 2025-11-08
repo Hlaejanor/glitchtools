@@ -15,10 +15,12 @@ from common.metadatahandler import (
     save_pipeline,
     save_processing_metadata,
 )
+
+
 from common.helper import compare_variability_profiles
 from common.fitsread import (
     read_event_data_crop_and_project_to_ccd,
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     fits_read,
     fits_save,
 )
@@ -32,10 +34,7 @@ from common.fitsmetadata import (
 )
 from common.helper import randomly_sample_from
 
-from common.generate_data import (
-    generate_synthetic_telescope_data,
-    generate_synth_if_need_be,
-)
+from common.generate_data import generate_synthetic_telescope_data
 import csv
 import os
 import sys
@@ -47,6 +46,7 @@ import argparse
 
 
 def create_default_pipeline():
+    print("creating deffault pipepline")
     take_time = None
     pipeline = load_pipeline("default")
 
@@ -84,7 +84,8 @@ def create_default_pipeline():
         phase_bins=30,
         time_bin_widths_count=30,
         time_bin_chunk_length=None,
-        take_time_seconds=take_time,
+        start_time_seconds=0,
+        end_time_seconds=take_time,
         anullus_radius_inner=None,
         anullus_radius_outer=None,
         padding_strategy=None,
@@ -109,7 +110,8 @@ def create_default_pipeline():
         time_bin_widths_count=30,
         phase_bins=30,
         time_bin_chunk_length=None,
-        take_time_seconds=take_time,
+        start_time_seconds=0,
+        end_time_seconds=take_time,
         anullus_radius_inner=None,
         anullus_radius_outer=None,
         padding_strategy=None,
@@ -139,6 +141,7 @@ def create_default_pipeline():
     anisogen = GenerationParameters(
         id="anisogen",
         alpha=5.0,
+        velocity=1.0,
         lucretius=-2,
         theta_change_per_sec=0.000001,
         r_e=0.8,
@@ -149,39 +152,64 @@ def create_default_pipeline():
         max_wavelength=1.0,
         min_wavelength=0.12,
         spectrum=antares_meta.apparent_spectrum,
-        star="Lightlane effect generator",
+        star="Synth",
     )
     save_gen_param(anisogen)
 
+    # Select A using an Id, flatten it. Then copy it, and poissonize it to get B. Then save B.
+    # Generate A using GenId, flatten it and then poissonize it. Then copy it and poissonize it again to get B.
+    # Should be more similar than antares_vs_rnd_antares
+
     pipeline1 = ComparePipeline(
         id="antares_vs_isogen",
-        A_fits_id=antares_meta.id,
-        B_fits_id=None,
+        source=antares_meta.id,
+        A_fits_id="antares_f",
+        B_fits_id="isogen_f",
+        A_tasks=["chandrashift", "flatten", "chandrashift"],
+        B_tasks=["generate", "flatten"],
         pp_id=pparam.id,
         gen_id=isogen.id,
     )
-
     save_pipeline(pipeline1)
 
+    # The control that proves that the poissonization is working as intended
     pipeline2 = ComparePipeline(
-        id="antares_vs_anisogen",
-        A_fits_id=antares_meta.id,
-        B_fits_id=anisogen.id,
+        id="rnd_antares_vs_rnd_antares",
+        source=antares_meta.id,
+        A_fits_id="antares_hp0",
+        B_fits_id="antares_hp1",
+        A_tasks=["chandrashift", "flatten", "poissonize"],
+        B_tasks=["copy", "poissonize"],
         pp_id=pparam.id,
-        gen_id=anisogen.id,
+        gen_id=isogen.id,
     )
-
     save_pipeline(pipeline2)
 
+    # The second control that proves that the poissonization is working as intended
     pipeline3 = ComparePipeline(
-        id="isogen_vs_anisogen",
-        A_fits_id=antares_meta.id,
-        B_fits_id=None,
+        id="rnd_anisogen_vs_rnd_anisogen",
+        A_fits_id="isogen_hp0",
+        B_fits_id="isogen_hp1",
+        A_tasks=["generate", "flatten", "poissonize"],
+        B_tasks=["copy", "poissonize"],
         pp_id=pparam.id,
         gen_id=anisogen.id,
     )
 
     save_pipeline(pipeline3)
+
+    pipeline4 = ComparePipeline(
+        id="anisogen_vs_rnd_anisogen",
+        source=None,
+        A_fits_id="anisogen",
+        B_fits_id="anisogen_hp",
+        A_tasks=["generate", "flatten"],
+        B_tasks=["copy", "poissonize"],
+        pp_id=pparam.id,
+        gen_id=anisogen.id,
+    )
+
+    save_pipeline(pipeline4)
 
 
 def main(generate: bool = True):

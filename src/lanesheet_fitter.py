@@ -125,7 +125,7 @@ def build_training_data(
     plot: bool = False,
 ) -> list[LanesheetMetadata]:
     # Set true parameters and simulate
-
+    velocity = 1.0
     wave_edges, wave_centers, wave_widths = get_wavelength_bins(pp)
     true_lanesheets = []
 
@@ -153,7 +153,13 @@ def build_training_data(
         )
         true_lanesheets.append(true_lanesheet)
 
-        points_ll = generate_dataset_for_experiment(true_lanesheet)
+        points_ll = generate_dataset_for_experiment(
+            ls=true_lanesheet,
+            theta_0=genparam.theta,
+            theta_change_er_sec=genparam.theta_change_per_sec,
+            t_max=genparam.t_max,
+            velocity=velocity,
+        )
 
         signature = generate_freq_signature(
             meta_id=meta.id, points_ll=points_ll, plot=plot, true_vals=true_lanesheet
@@ -210,6 +216,7 @@ def estimate_lanestack(
         lanesheet = LanesheetMetadata(
             id=meta.id,
             truth=False,
+            empirical=False,
             lambda_center=wave_centers[i],
             lambda_width=wave_widths[i],
             exp_flux_per_sec=exp_flux_per_sec,
@@ -373,6 +380,7 @@ if __name__ == "__main__":
     default_gen = GenerationParameters(
         id="template",
         alpha=1.0,
+        velocity=1,
         lucretius=-1,
         theta_change_per_sec=0.0,
         r_e=1,

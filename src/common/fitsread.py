@@ -75,9 +75,41 @@ def get_cached_filename(
     return exists, cache_filename
 
 
+def fits_to_dataframe(fits_file: str) -> DataFrame:
+    assert fits_file_exists(fits_file), f"FITS file {fits_file} does not exist!"
+    # Path to the FITS file (update this with the correct path)
+    print(f"Reading file {fits_file}")
+    try:
+        # Silly but efficient recover from stupid path error
+        if fits_file[0:5] == "fits/":
+            fits_file = fits_file[5:]
+        with fits.open(f"fits/{fits_file}") as hdul:
+            hdul.info()
+
+            # Access the data table
+            event_data = hdul[1].data  # Events are typically in the second HDU
+
+            # Print column names and the first few rows
+            # print("Columns in the event file:")
+            # print(event_data.names)
+
+        # Convert the FITS data to an Astropy Table
+        table = Table(event_data)
+        names = [name for name in table.colnames if len(table[name].shape) <= 1]
+        if "time" in table.colnames:
+            table.sort("time")
+        df = table[names].to_pandas()
+
+    except Exception as e:
+        print(f"Error reading FITS file {fits_file}: {e}")
+        raise e
+
+    return df
+
+
 def fits_read_cache_if_exists(cache_filename_path) -> DataFrame:
     # Path to the FITS file (update this with the correct path)
-    print(f"Attempting to open {cache_filename_path}")
+    print(f"Reading cached file {cache_filename_path}")
 
     # Silly but efficient recover from stupid path error
     if cache_filename_path[0:5] == "fits/":
@@ -89,8 +121,8 @@ def fits_read_cache_if_exists(cache_filename_path) -> DataFrame:
         event_data = hdul[1].data  # Events are typically in the second HDU
 
         # Print column names and the first few rows
-        print("Columns in the event file:")
-        print(event_data.names)
+        # print("Columns in the event file:")
+        # print(event_data.names)
         # print("\nFirst 20 rows:")
         # print(event_data[:20])
 
@@ -108,16 +140,14 @@ def fits_read_cache_if_exists(cache_filename_path) -> DataFrame:
 def fits_file_exists(filename):
     filename = str.replace(filename, "//", "/")
 
-    fits_file = f"fits/{filename}"
-
-    file_exists = os.path.isfile(fits_file)
+    file_exists = os.path.isfile(filename)
 
     return file_exists
 
 
 def fits_read(fits_file) -> DataFrame:
     # Path to the FITS file (update this with the correct path)
-    print(f"Attempting to open {fits_file}")
+    print(f"Attempting fits file {fits_file}")
     try:
         # Silly but efficient recover from stupid path error
         if fits_file[0:5] == "fits/":
@@ -129,8 +159,8 @@ def fits_read(fits_file) -> DataFrame:
             event_data = hdul[1].data  # Events are typically in the second HDU
 
             # Print column names and the first few rows
-            print("Columns in the event file:")
-            print(event_data.names)
+            # print("Columns in the event file:")
+            # print(event_data.names)
             # print("\nFirst 20 rows:")
             # print(event_data[:20])
 
@@ -160,8 +190,8 @@ def crop_chandra_data(data, pos, radius):
 def mask_event_data(data, bright_pixel_array, radius):
     print("Removing hits close to existing sources")
     combined = data["Hit"] == 1
+    print(f"Removing {len(bright_pixel_array)} pixels with radius {radius}")
     for pix in bright_pixel_array:
-        print(f"Removing bright pixel {pix} with radius {radius}")
         outside_x = np.abs(data["CCD X"] - pix[0]) > radius
         combined = np.logical_and(combined, outside_x)
         outside_y = np.abs(data["CCD Y"] - pix[1]) > radius
@@ -418,7 +448,10 @@ def fits_save_chunk_analysis(
         print(f" Exception : {repr(e)}")
 
 
-def fits_save_event_file(event_data: FitsMetadata, meta: FitsMetadata):
+def fits_save_event_file(event_data: DataFrame, meta: FitsMetadata):
+    print(
+        f"Saving fits file {meta.id} into file {meta.raw_event_file} with {event_data.shape[0]} obs and {event_data.shape[1]} columns"
+    )
     event_table = Table.from_pandas(event_data)
 
     event_table.write(meta.raw_event_file, format="fits", overwrite=True)
@@ -426,9 +459,9 @@ def fits_save_event_file(event_data: FitsMetadata, meta: FitsMetadata):
     return meta
 
 
-def fits_save_events_generated(
-    events, genmeta: GenerationParameters, use_this_id: str = None
-) -> FitsMetadata:
+def fits_save_events_with_pi_channel(
+    events: list, genmeta: GenerationParameters, use_this_id: str = None
+) -> tuple[FitsMetadata, DataFrame]:
     """
     Save synthetic or modified photon events to a FITS file with chandra like pi-mappintg to mitigate quantization artifacts in the low-energy regime.
 
@@ -442,23 +475,22 @@ def fits_save_events_generated(
         meta_id = str(uuid.uuid4())[:8]  # unique short id
     else:
         meta_id = use_this_id
-    filename = f"fits/synthetic_lightlane/{meta_id}_gen.fits"
+    filename = f"fits/{meta_id}.fits"
     print(
         f"Saving dataset {meta_id} ({len(events)}) obs. Used Generation Params {genmeta.id})"
     )
     try:
         events_array = np.array(events)
 
-        pi_channels = chandra_like_pi_mapping(events_array[:, 3])
-
         # Create FITS table
         event_table = Table()
         event_table["time"] = events_array[:, 0]
-        event_table["x"] = events_array[:, 1]
-        event_table["y"] = events_array[:, 2]
-        # event_table["ll_x"] = events_array[:, 3]
-        # event_table["ll_y"] = events_array[:, 4]
-        event_table["pi"] = pi_channels
+        # event_table["lanecount"] = events_array[:, 1]
+        # event_table["ll_x"] = events_array[:, 2]
+        # event_table["ll_y"] = events_array[:, 3]
+        event_table["pi"] = chandra_like_pi_mapping(events_array[:, 4])
+        event_table["x"] = events_array[:, 5]
+        event_table["y"] = events_array[:, 6]
 
         fitsmeta = FitsMetadata(
             id=meta_id,
@@ -473,16 +505,19 @@ def fits_save_events_generated(
             t_min=genmeta.t_min,
             t_max=genmeta.t_max,
             gen_id=genmeta.id,
+            apparent_spectrum=genmeta.spectrum,
             ascore=None,
         )
         save_fits_metadata(fitsmeta)
+
         # Save to FITS
         print(f"Writing {filename} with {len(event_table)} events")
         event_table.write(filename, format="fits", overwrite=True)
-
-        return fitsmeta
+        # Verify by reading back
+        events = fits_read(fitsmeta.raw_event_file)
+        return events, fitsmeta
     except Exception as e:
-        raise Exception("Error saving fitsmetadata ", e)
+        raise Exception("Error saving fits file ", e)
         print(f" Exception : {repr(e)}")
 
 
@@ -491,8 +526,6 @@ def process_dataset(
     ccd_resolution,
     max_wavelength,
     min_wavelength,
-    set_zero_time_to_first_observation=False,
-    take_time_seconds=None,
 ) -> DataFrame:
     """
     Convert Chandra event data to a virtual CCD dataset.
@@ -506,24 +539,18 @@ def process_dataset(
         pd.DataFrame: Simplified dataset with relative time, CCD X, CCD Y, and wavelength.
     """
     event_data = event_data.copy()
+    assert "x" in event_data.columns, "Need to have 'x' column in dataset"
+    assert "y" in event_data.columns, "Need to have 'y' column in dataset"
     # Sort by time to ensure first event is earliest
     event_data = event_data.sort_values("time").reset_index(drop=True)
     print(f"Length 1.0 {len(event_data)}")
     # Set t = 0 for the first observation
     t0 = event_data["time"][0]
-    if set_zero_time_to_first_observation:
-        event_data["relative_time"] = event_data["time"] - t0
-    else:
-        event_data["relative_time"] = event_data["time"]
-    print(f"Length 2.0 {len(event_data)}")
 
-    if take_time_seconds:
-        print(f"Taking only first {take_time_seconds} seconds of full observation")
-        event_data = event_data[event_data["relative_time"] < take_time_seconds]
     print(f"Length after time reduction: {len(event_data)}")
     event_data = assign_sampled_wavelengths(event_data)
     before_filtering = len(event_data)
-    print(event_data.head(200))
+    # print(event_data.head(200))
     print(f"Removing entries with wavelength > {max_wavelength} and < {min_wavelength}")
     wavelength_mask = np.logical_and(
         event_data["Wavelength (nm)"] > min_wavelength,
@@ -541,19 +568,26 @@ def process_dataset(
     # Scale X, Y to CCD resolution
     x_min, x_max = event_data["x"].min(), event_data["x"].max()
     y_min, y_max = event_data["y"].min(), event_data["y"].max()
+
+    assert x_max - x_min > 0, "If x_max - x_min is 0, then we're in trouble!"
+    assert y_max - y_min > 0, "If y_max - y_min is 0, then we're in trouble!"
+    event_data = event_data[np.isfinite(event_data["x"]) & np.isfinite(event_data["y"])]
+    # If CCD resolution is a single integer (square grid)
     event_data["CCD X"] = (
         (event_data["x"] - x_min) / (x_max - x_min) * (ccd_resolution - 1)
     ).astype(int)
+
     event_data["CCD Y"] = (
         (event_data["y"] - y_min) / (y_max - y_min) * (ccd_resolution - 1)
     ).astype(int)
+
     event_data["Hit"] = True
     print(f"Length 4.0 {len(event_data)}")
 
     print(f"Length 5.0 {len(event_data)}")
     # Create a smaller dataset with the required columns
     simplified_data = event_data[
-        ["relative_time", "CCD X", "CCD Y", "Wavelength (nm)", "pi", "Hit"]
+        ["time", "CCD X", "CCD Y", "Wavelength (nm)", "pi", "Hit"]
     ]
 
     if not isinstance(simplified_data, DataFrame):
@@ -616,19 +650,12 @@ def crop_and_project_to_CCD(
         return False, fitsmeta, None
         raise Exception("Table got filtered empty")
 
-    if fitsmeta.synthetic:
-        clamp_time = False
-    else:
-        clamp_time = True
-
     # Process the event data
     virtual_ccd_data = process_dataset(
         event_data=filtered_table,
         ccd_resolution=pparams.resolution,
         max_wavelength=pparams.max_wavelength,
         min_wavelength=pparams.min_wavelength,
-        set_zero_time_to_first_observation=clamp_time,
-        take_time_seconds=pparams.take_time_seconds,
     )
     if len(virtual_ccd_data) == 0:
         return False, fitsmeta, virtual_ccd_data
@@ -641,7 +668,7 @@ def crop_and_project_to_CCD(
     if fitsmeta.source_pos_x and fitsmeta.source_pos_y:
         center = [int(fitsmeta.source_pos_x), int(fitsmeta.source_pos_y)]
     else:
-        print("WARNING : Asusming that the radius cropping is from the center position")
+        print("WARNING : Assuming that the radius cropping is from the center position")
         center = np.array([pparams.resolution / 2, pparams.resolution / 2])
     cropped_ccd_data, source_area = crop_chandra_data(
         virtual_ccd_data,

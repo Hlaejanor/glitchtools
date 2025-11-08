@@ -1,53 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from common.powerdensityspectrum import PowerDensitySpectrum, exp_count_per_sec
-from common.fitsmetadata import FitsMetadata, GenerationParameters
+from common.fitsmetadata import FitsMetadata, GenerationParameters, ProcessingParameters
 from common.fitsread import (
     fits_file_exists,
     fits_read,
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     pi_channel_to_wavelength_and_width,
 )
-
 from scipy.spatial import cKDTree
 from common.lanesheetMetadata import LanesheetMetadata
-
 import imageio
 
 
-from common.helper import (
-    estimate_lanecount_fast,
-)
+from common.helper import estimate_lanecount_fast, estimate_lanecount, get_duration
 
 
-def regenerate_synth_file(meta: FitsMetadata, genmeta: GenerationParameters):
-    print(f"Regenerating synthetic file for meta {meta.id}")
-    log = []
-    events = generate_synthetic_telescope_data(
-        genmeta, single_wavelength=None, lwidth=None
-    )
-    log.append(f"Saving synthetic event file to fits file :{meta.raw_event_file}")
-    fits_save_events_generated(events=events, genmeta=genmeta)
-
-
-def generate_synth_if_need_be(meta: FitsMetadata, lamb=None, lwidth=None):
-    if fits_file_exists(meta.synthetic):
-        events = fits_read(meta.synthetic_twin_event_file)
-    else:
-        events = generate_synthetic_telescope_data(
-            meta, single_wavelength=lamb, lwidth=lwidth
-        )
-        fits_save_events_generated(events, meta.synthetic_twin_event_file)
-
-    return True
-
-
-"""
-Using the generation parameters, produce 
-"""
-
-
-def generate_synthetic_telescope_data(genmeta: GenerationParameters, wavelength_bins):
+def generate_synthetic_telescope_data(
+    genmeta: GenerationParameters, pp: ProcessingParameters
+):
     events = []
     assert genmeta.t_max is not None, "t_max must be set and > 0"
     assert genmeta.spectrum is not None, "Spectrum must be set to generate data"
@@ -60,114 +31,149 @@ def generate_synthetic_telescope_data(genmeta: GenerationParameters, wavelength_
 
     t = 0.0  # TODO - have t0 as a parameter
     t = 0
+    # The number of steps required to use 100 second generation chunks
+    steps = get_duration(genmeta) / 100
+    # Since steps need to be integer, compute the time step so that it exactly matches the length of the dataset
+    dt = get_duration(genmeta) / np.floor(steps)
+    # Generate a synthetic event file using genparam, which include the spectrum and duration
+
     sheet_size = (
         np.max(np.array([np.cos(genmeta.theta), np.sin(genmeta.theta)])) * genmeta.t_max
     )
     velvec = np.array([np.cos(genmeta.theta), np.sin(genmeta.theta)])
 
     lambda_nm = np.flip(
-        np.linspace(genmeta.max_wavelength, genmeta.min_wavelength, wavelength_bins)
+        np.linspace(genmeta.max_wavelength, genmeta.min_wavelength, pp.wavelength_bins)
     )
-    lambda_bin_width = np.ones(wavelength_bins) * np.abs((lambda_nm[0] - lambda_nm[1]))
+    lambda_bin_width = np.ones(pp.wavelength_bins) * np.abs(
+        (lambda_nm[0] - lambda_nm[1])
+    )
 
     lambdas = np.stack((lambda_nm, lambda_bin_width), axis=1)
     l_idx = 0
     total_added = 0
-    for lamb, lambda_bin_width in lambdas:
-        t = 0.0
-        flux_per_sec = (
-            exp_count_per_sec(
+    last_bin = lambdas[-1][0]
+    try:
+        for lamb, lambda_bin_width in lambdas:
+            t = 0.0
+            flux_per_sec = exp_count_per_sec(
                 lamb,
                 genmeta.spectrum.A,
                 genmeta.spectrum.lambda_0,
                 genmeta.spectrum.sigma,
                 genmeta.spectrum.C,
             )
-            / 2
-        )  # Divide by two to get the same counts for the datasets. Somewhere (could be in the esimation of the flux per seconds for the spectrum) there is a factor 2 error.
-        assert lambda_bin_width > 0, f"Lambda bin must be > 0, was {lambda_bin_width}"
-        print(f"Flux per {lamb}:  {flux_per_sec} per sec from empirical lambda ")
+            assert (
+                lambda_bin_width > 0
+            ), f"Lambda bin must be > 0, was {lambda_bin_width}"
+            print(f"Flux per {lamb}:  {flux_per_sec} per sec from empirical lambda ")
 
-        lanesheet_meta = LanesheetMetadata(
-            id=f"{genmeta.id}_bin_{l_idx}",
-            truth=False,
-            lambda_center=lamb,
-            lambda_width=lambda_bin_width,
-            exp_flux_per_sec=flux_per_sec,
-            alpha=genmeta.alpha,
-            # theta=genmeta.theta,
-            r_e=genmeta.r_e,
-            perp=genmeta.perp,
-            phase=genmeta.phase,
-            lucretius=genmeta.lucretius,
-            lucretius_tolerance=None,
-            alpha_tolernace=None,
-            perp_tolerance=None,
-            phase_tolerance=None,
-            theta_tolerance=None,
-        )
+            ls = LanesheetMetadata(
+                id=f"{genmeta.id}_bin_{l_idx}",
+                truth=False,
+                empirical=genmeta.empirical,
+                lambda_center=lamb,
+                lambda_width=lambda_bin_width,
+                exp_flux_per_sec=flux_per_sec,
+                alpha=genmeta.alpha,
+                # theta=genmeta.theta,
+                r_e=genmeta.r_e,
+                perp=genmeta.perp,
+                phase=genmeta.phase,
+                lucretius=genmeta.lucretius,
+                lucretius_tolerance=None,
+                alpha_tolerance=None,
+                perp_tolerance=None,
+                phase_tolerance=None,
+                theta_tolerance=None,
+            )
+            # A dioburst will appear when many lightlanes become commensurate
+            # In the generator, this nominally occurs when phase = 0.0, because that corresponds to when the lanesheet is initialized. As time progresses,
+            # The lanes drift out of sync, and eventually into sync again. When the lanes are fully synced, Diophantine Bursts (diobursts) are created.
+            # To avoid the simulation always starting in the middle of a burst, we can vary the phase and perp, indicating the number of seconds before and a diobursts
+            # Var they velocity parameter to speed up how quickly the generator moves between bursts
+            perp_dir = np.array([-velvec[1], velvec[0]])
 
-        dt = 100
-
-        perp_dir = np.array([-velvec[1], velvec[0]])
-        pos = perp_dir * genmeta.perp
-        # Use the same x-ray distribution as the chandra dataset, to obtain an estimate for the number of photons to expect on average for this time bin length
-        exp_lanecount = estimate_lanecount_fast(
-            lanesheet_meta
-        )  # Divide by two to get the same counts for the datasets. Somewhere (could be in the esimation of the flux per seconds for the spectrum) there is a factor 2 error.
-        while t < genmeta.t_max:
+            pos = perp_dir * (genmeta.perp * genmeta.alpha)
+            pos += velvec * (genmeta.phase * genmeta.alpha)
+            # Use the same x-ray distribution as the chandra dataset, to obtain an estimate for the number of photons to expect on average for this time bin length
             theta = genmeta.theta_change_per_sec * t + genmeta.theta
-
-            if exp_lanecount > 4:
+            velvec = np.array([np.cos(theta), np.sin(theta)]) * genmeta.velocity
+            if ls.empirical:
                 print(
-                    f"{genmeta.id}: SYNTH gen  (isotropic): Time t:{t} for lambda: {lamb}, theta {theta:.2f} Flux {flux_per_sec}/s. Lanecount: {exp_lanecount}"
+                    f"Using empirical lanecount estimator. Note that this requires that the genmeta paramters alpha and r_e  are given in light-seconds, and velocity as share of c."
                 )
-                hits = generate_synthetic_hits_isotropic(t, dt, lanesheet_meta)
-                if hits.size > 0:
-                    events.extend(hits)
+                exp_lanecount, g = estimate_lanecount(
+                    ls
+                )  # Use the new, empirical computation of lanecount which has parity with
+                tree = generate_triangular_grid_along_path_empirical(
+                    pos=pos, velvec=velvec, dt=dt, g=g, r_e=ls.r_e
+                )
+
             else:
-                # Compute the change in theta over time
-
-                # Compute the new velocity vector
-                velvec = np.array([np.cos(theta), np.sin(theta)])
-                pos += dt * velvec
                 print(
-                    f"{genmeta.id}: SYNTH gen (lightlane): Time t:{t} for lambda: {lamb}, theta {theta:.2f}  Flux {flux_per_sec}/s. Lanecount: {exp_lanecount}"
+                    f"Using dimensionelss lanecount estimator. The parameters alpha and r_e are dimensionless and velocity ought to be 1.0"
                 )
-                if True:
-                    try:
-                        points, tree = generate_triangular_grid_along_path(
-                            pos,
-                            theta,
-                            dt,
-                            lanesheet_meta.get_g(),
-                            lanesheet_meta.r_e,
-                        )
-                    except Exception as e:
-                        raise e
-                else:
-                    points, tree = generate_triangular_neighbourhood(
-                        pos,
-                        lanesheet_meta.theta,
-                        meta.time_bin_seconds,
-                        lanesheet_meta.g,
-                        lanesheet_meta.r_e,
-                    )
-                hits = generate_synthetic_hits_vectorized_3(
+                exp_lanecount, g = estimate_lanecount_fast(
+                    ls
+                )  # Use the old, dimensionless computation of lanecount
+                tree = generate_triangular_grid_along_path_empirical(
                     pos=pos,
-                    theta=theta,
-                    t0=t,
+                    velvec=velvec,
                     dt=dt,
-                    ls=lanesheet_meta,
-                    lanesheet_tree=tree,
+                    r_e=ls.r_e,
+                    g=g,
                 )
-                total_added += len(hits)
-                if hits.size > 0:
-                    events.extend(hits)
+            # The double
+            g_y = (np.sqrt(3) / 2) * g * 2
+            noise_percent = 0.01
 
-            t += dt
+            lanecount_homogenous = 1 / (noise_percent**2)
 
-        l_idx += 1
+            while t < genmeta.t_max - dt:
+                if t > genmeta.t_max - 2 * dt:
+                    print("The last")
+                theta = genmeta.theta_change_per_sec * t + genmeta.theta
+
+                if exp_lanecount > lanecount_homogenous:
+                    print(
+                        f"{genmeta.id}: SYNTH gen  (isotropic): Time t:{t:.2f} for lambda: {lamb:.2f}, theta {theta:.2f} Flux {flux_per_sec}/s. Lanecount: {exp_lanecount:.2f}"
+                    )
+                    hits = generate_synthetic_hits_isotropic(t, dt, ls)
+                    if hits.size > 0:
+                        events.extend(hits)
+                else:
+                    # Compute the change in theta over time
+
+                    # Compute the new velocity vector
+                    velvec = np.array([np.cos(theta), np.sin(theta)]) * ls.velocity
+                    pos += dt * velvec
+
+                    hits, pos, avg_lanes = generate_synthetic_hits_vectorized_3(
+                        pos=pos,
+                        theta=theta,
+                        exp_lanecount=exp_lanecount,
+                        t0=t,
+                        dt=dt,
+                        ls=ls,
+                        lanesheet_tree=tree,
+                        tile_width=g,
+                        tile_height=g_y * 2,
+                    )
+
+                    total_added += len(hits)
+                    if hits.size > 0:
+                        events.extend(hits)
+
+                    print(
+                        f"{genmeta.id}: SYNTH gen (lightlane): Time t:{t:.2f} for lambda: {lamb:.2f}, theta {theta:.2f} Flux {flux_per_sec:.2f}/s. Lanecount: {exp_lanecount:.2f} real-lanecount : {avg_lanes:.2f} Diff {((avg_lanes / exp_lanecount)-1)* 100:.2f}%"
+                    )
+
+                t += dt
+
+            l_idx += 1
+    except Exception as e:
+        raise e
     return events
 
 
@@ -220,30 +226,44 @@ def generate_dataset_for_experiment(
     ls: LanesheetMetadata,
     dt: int = 1,
     t_max=10000,
+    velocity: float = 1.0,
 ):
     photon_hits = []
     t0 = 0.0
-    lc = estimate_lanecount_fast(ls)
+    if ls.empirical:
+        lc = estimate_lanecount(ls)
+    else:
+        lc = estimate_lanecount_fast(ls)
     g = ls.get_g()
-    velvec = np.array([np.cos(ls.theta), np.sin(ls.theta)])
-    offset = ls.phase * velvec
+    # Compute the initial unit vector angle
+    velvec = np.array([np.cos(theta_0), np.sin(theta_0)])
+    # A diophantine burst appears near phase = 0.0. Phase contains the number of seconds after such a diophantine burst
+    # For example, a negative value here can be interesting for recreating diophantine bands
+    pos = (ls.phase * velocity) * velvec
     perp_dir = np.array([-velvec[1], velvec[0]])
-    offset += ls.perp * perp_dir
+    pos += (ls.perp * velocity) * perp_dir
     t = 0
     while t < t_max:
         print(f"Generating for {ls.lambda_center} at time {t}")
         theta = theta_0 + theta_change_er_sec * t
-        if lc > 5:
+        if lc > 100:
             more_hits = generate_synthetic_hits_isotropic(t0=t0, dt=dt, meta=ls)
 
             photon_hits.extend(more_hits)
         else:
-            lanes, lanesheet_tree = generate_triangular_grid_along_path(
-                start=offset, theta=ls.theta, dt=dt, r_e=ls.r_e, g=g
-            )
+            if ls.empirical:
+                lanes, lanesheet_tree = generate_triangular_grid_along_path_empirical(
+                    pos=pos, dt=dt, r_e=ls.r_e, g=g
+                )
+            else:
+                lanes, lanesheet_tree = generate_triangular_grid_along_path(
+                    start=pos, theta=theta, dt=dt, r_e=ls.r_e, g=g
+                )
 
-            more_hits = generate_synthetic_hits_vectorized_3(
+            more_hits, pos = generate_synthetic_hits_vectorized_3(
+                pos=pos,
                 t0=t,
+                velocity=velocity,
                 theta=theta,
                 dt=dt,
                 ls=ls,
@@ -257,51 +277,66 @@ def generate_dataset_for_experiment(
     return photon_hits
 
 
-def generate_triangular_neighbourhood(start, theta, dt, g, r_e):
+def generate_triangular_grid_along_path_empirical(pos, velvec, dt, g, r_e):
     """
-    Generate a triangular grid aligned to [0,0]
+    Generate 2D triangular (hexagonal) lattice points around a moving position.
+    The lattice is aligned so that [0,0] lies on a grid node.
     """
-    dy = (np.sqrt(3) / 2) * g
+    # local movement vector
 
-    # Align to base grid
-    x_pos = start[0] - (start[0] % g)
-    y_pos = start[1] - (start[1] % dy)
+    path_vec = velvec * dt
+    path_length = np.linalg.norm(path_vec)
+    if not np.isfinite(path_length) or path_length <= 0:
+        raise ValueError("Path length must be positive and finite.")
 
-    # Maximum expected travel
-    x_max = np.abs(np.cos(theta)) * dt
-    y_max = np.abs(np.sin(theta)) * dt
+    # nearest grid anchor offset
 
-    # Number of steps needed in each direction (+ margin)
-    margin = r_e + g
-    grid_x = int(np.ceil((x_max + margin) / g)) + 1
-    grid_y = int(np.ceil((y_max + margin) / dy)) + 1
+    offset = np.array([pos[0] % g, pos[1] % g])
 
-    points = []
-    for row in range(-grid_y, grid_y + 1):
-        for col in range(-grid_x, grid_x + 1):
-            x_shift = 0.5 * g if (row % 2) else 0.0
-            x = col * g + x_shift + x_pos
-            y = row * dy + y_pos
-            points.append([x, y])
+    # how many columns/rows of grid points are needed to cover a radius r_e
+    n_cols = int(np.ceil(r_e / g))
+    n_rows = int(np.ceil((2 * r_e) / (np.sqrt(3) * g)))
 
-    points = np.array(points)
-    points.sort(axis=0)
-    return points, cKDTree(points)
+    # pad to include motion
+    pad_x = int(np.ceil(abs(path_vec[0]) / g)) + 2
+    pad_y = int(np.ceil(abs(path_vec[1]) / g / (np.sqrt(3) / 2))) + 2
+
+    dy = np.sqrt(3) / 2 * g
+    lanes = []
+    skipped = 0
+    for row in range(-n_rows - pad_y, n_rows + pad_y):
+        for col in range(-n_cols - pad_x, n_cols + pad_x):
+            x = col * g + (0.5 * g if row % 2 else 0.0)
+            y = row * dy
+            point = pos + np.array([x, y]) - offset
+            lanes.append(point)
+            """
+            if np.linalg.norm(point-pos) < r_e - path_vec:
+                
+                lanes.append(point)
+            else:
+                skipped +=1
+            """
+
+    # print(f"Included {len(lanes)}, skipped {skipped}")
+    lanes = np.array(lanes)
+    return cKDTree(lanes)
 
 
-def generate_triangular_grid_along_path(start, theta, dt, g, r_e):
+def generate_triangular_grid_along_path(start, theta, dt, g, r_e, velocity):
     """
     Generate a triangular grid aligned to [0,0]
     """
     # Compute snapped grid origin (lower-left anchor)
     anchor = (np.floor(start / g)) * g
     offset = start - anchor  # relative offset into grid cell
-    velvec = np.array([np.cos(theta), np.sin(theta)])
+    velvec = np.array([np.cos(theta), np.sin(theta)]) * velocity
     # Shift the path by the offset so the grid is aligned at [0,0]
     rel_start = start - offset
     rel_end = rel_start + velvec * dt
     path_vec = rel_end - rel_start
     path_length = np.linalg.norm(path_vec)
+    assert path_length > 0, "Path length cannot be None or nan"
 
     # Path directions
     path_dir = path_vec / path_length
@@ -385,207 +420,106 @@ def generate_synthetic_hits_vectorized_3(
     t0: float,
     dt: float,
     theta: float,
+    exp_lanecount: float,
     ls: LanesheetMetadata,
     lanesheet_tree,
-):
+    tile_width: float,
+    tile_height: float,
+) -> tuple[np.ndarray, np.ndarray, float]:
     try:
-        velvec = np.array([np.cos(theta), np.sin(theta)])
-        interpolation = (ls.r_e / np.linalg.norm(velvec)) * 100
-        idt = dt / interpolation
-        exp_lanecount = estimate_lanecount_fast(ls)
+        # Compute the velocity vector used within this dt chunk
+        velvec = np.array([np.cos(theta), np.sin(theta)]) * ls.velocity
+
+        # Adaptive resolution of the simulation. If the r_e is small, it is more important to have fine resolution
+        # If r_e is large enough, then it might be enough with a single subdivision within each dt.
+        # But if r_e is significantly smaller than the range we cover within a single dt, then we must subdivide.
+        subdivisions = max(1.0, np.ceil(ls.velocity / (ls.r_e / 100.0)))
+        idt = (
+            dt / subdivisions
+        )  # The step-length in seconds for the subdivided generation
+
         exp_count_per_lane_per_sec = (
             ls.exp_flux_per_sec * ls.lambda_width
         ) / exp_lanecount
+        # How many hits we expect to see per idt (second)
         exp_count_per_lane_per_idt = exp_count_per_lane_per_sec * idt
-        hits = []
-        t = 0
-        halfwidth = ls.lambda_width / 2
-        times = []
-        lanes = []
-        positions = []
+
+        t = 0.0
+        halfwidth = ls.lambda_width / 2.0
+        lanetime = []
+
         while t < dt:
-            # Find nearby lightlanes (using expanded radius)
-            nearby_idxs = lanesheet_tree.query_ball_point(pos, r=ls.r_e)
-            if nearby_idxs:
-                times.append(t0 + t)
-                lanes.append(len(nearby_idxs))
-                positions.append(pos)
+            # Compute the position relative to the corner of an repeating lane tile (which is what the tree requires)
+            # This hack means no need to reinitialize the ckdtree more than once per wavelength bin
+            pos_rel_to_nearest_tile = np.array(
+                [pos[0] % tile_width, pos[1] % tile_height]
+            )
+            # Obtain the list of indices that we are receiving from
+            nearby_idxs = lanesheet_tree.query_ball_point(
+                pos_rel_to_nearest_tile, r=ls.r_e
+            )
+
+            # Record time, number of nearby lanes, and the absolute position at this sub-step
+            # Lanetime columns :
+            # Time, instantatneous lanecount, lanesheet position x, lanesheet posistion y, wavelength, ccd_x, ccd_y
+            lanetime.append(
+                np.array(
+                    [t0 + t, float(len(nearby_idxs)), pos[0], pos[1], 0.0, 0.0, 0.0]
+                )
+            )
 
             pos += velvec * idt
             t += idt
 
-        times = np.array(times)  # The points in time that were close enough
-        lanes = np.array(lanes)
-        if len(positions) == 0:
-            positions = np.empty((0, 4))
-        else:
-            positions = np.array(positions)
+        lanetime = np.array(lanetime)
+        # Guard against no samples
+        if lanetime.size == 0:
+            return np.empty((0, 4)), pos, 0.0
 
-        n_idt = idt * len(times)  # Number of idt that hit lanes
+        sum_of_lanes = np.sum(lanetime[:, 1])
+        if sum_of_lanes <= 0 or not np.isfinite(sum_of_lanes):
+            return np.empty((0, 4)), pos, 0.0
 
-        sum_of_lanes = np.sum(lanes)
-        p_planes = (
-            lanes / sum_of_lanes
+        prob_of_idt = (
+            lanetime[:, 1] / sum_of_lanes
         )  # Change lanes to probability that can be cumulated
 
         photon_hits = np.random.poisson(sum_of_lanes * exp_count_per_lane_per_idt)
         if photon_hits == 0:
-            return np.empty((0, 4))
+            return np.empty((0, 4)), pos, 0.0
+
         # Precompute cumulative probabilities
-        cumulative_prob = np.cumsum(p_planes)
+        cumulative_prob = np.cumsum(prob_of_idt)
 
         # Uniform random numbers [0,1)
-        random_uniform = np.random.uniform(0, 1, photon_hits)
+        random_uniform = np.random.uniform(0.0, 1.0, photon_hits)
 
         # Find indices corresponding to the cumulative distribution
-        photon_time_index = np.searchsorted(cumulative_prob, random_uniform)
+        photon_time_index = np.searchsorted(
+            cumulative_prob, random_uniform, side="right"
+        )
+        photon_time_index = np.clip(photon_time_index, 0, len(lanetime) - 1)
 
         # Generate time-jitter within the idt width
+        photon_time_jitter = np.random.uniform(-idt / 2.0, idt / 2.0, photon_hits)
 
-        photon_time_jitter = np.random.uniform(-idt / 2, idt / 2, photon_hits)
-        ccd_pos = np.random.uniform(-1.0, 1.0, (photon_hits, 2))
-
-        t_samples = times[photon_time_index] + photon_time_jitter
-        photon_positions = positions[photon_time_index].copy()
-        photon_positions += photon_time_jitter[:, None] * velvec
-        photon_lambdas = ls.lambda_center + np.random.uniform(
+        # positions on the lanes (absolute coordinates) and apply motion jitter
+        photon_positions = lanetime[photon_time_index].copy()
+        photon_positions[:, [2, 3]] += photon_time_jitter[:, None] * velvec
+        # Compute the avg_lane before pruning the empty idts
+        avg_lanes = float(np.mean(lanetime[:, 1])) if lanetime.shape[0] > 0 else 0.0
+        lanetime = lanetime[photon_time_index]
+        # Appy time jitter to avoid the dt of the generator leaving a residual beat
+        lanetime[:, 0] += photon_time_jitter
+        # Apply wavelength jitter to avoid generated data clustering at wavelength bin centers
+        lanetime[:, 4] = ls.lambda_center + np.random.uniform(
             -halfwidth, halfwidth, photon_hits
         )
-        hits = np.column_stack(
-            [
-                t_samples,
-                ccd_pos[:, 0],
-                ccd_pos[:, 1],
-                photon_lambdas,
-            ]
-        )
-        return hits
+        # Assign random coordinates on the CCD
+        lanetime[:, 5] = np.random.uniform(-1, 1)
+        lanetime[:, 6] = np.random.uniform(-1, 1)
+
+        return lanetime, pos, avg_lanes
     except Exception as e:
-        print(f"Error ", e)
-
-        return np.empty((0, 5))
-
-
-def generate_synthetic_hits_vectorized_2(
-    t0: float, theta: float, meta: LanesheetMetadata, lanesheet_tree
-):
-    dt = meta.dt
-
-    velvec = np.array([np.cos(theta), np.sin(theta)])
-    meta.interpolation = (meta.r_e / np.linalg.norm(velvec)) * 10
-
-    idt = meta.dt / meta.interpolation
-    exp_lanecount = estimate_lanecount_fast(meta)
-    exp_count_per_lane = meta.exp_flux_per_sec / exp_lanecount
-    exp_count_per_lane_per_idt = exp_count_per_lane / meta.interpolation
-
-    camera_hits = []
-    pos = np.copy(meta.offset)
-    t = 0
-    halfwidth = meta.lambda_width / 2
-    while t < dt:
-        # Find nearby lightlanes (using expanded radius)
-        nearby_idxs = lanesheet_tree.query_ball_point(pos, r=meta.r_e)
-        if nearby_idxs:
-            n_lightlanes = len(nearby_idxs)
-            n_photons = np.random.poisson(
-                exp_count_per_lane_per_idt * n_lightlanes * meta.lambda_width
-            )
-            if n_photons == 0:
-                continue
-            # Vector of random time offsets within [0, idt]
-            t_offsets = np.random.uniform(0, idt, n_photons)
-            ccd_pos = np.random.uniform(-1.0, 1.0, (n_photons, 2))
-            t_samples = t0 + t + t_offsets
-
-            # Displacement along the camera path
-            displacements = np.outer(t_offsets, velvec)
-            photon_positions = pos + displacements
-            photon_lambdas = meta.lambda_center + np.random.uniform(
-                -halfwidth, halfwidth, n_photons
-            )
-
-            hits = np.column_stack(
-                [
-                    t_samples,
-                    ccd_pos,
-                    photon_positions,
-                    photon_lambdas,
-                ]
-            )
-            camera_hits.append(hits)
-        print(
-            f"Sampled {len(hits)} for lambda {meta.lambda_center} (+m {meta.lambda_width/2})"
-        )
-        pos += velvec * idt
-        t += idt
-
-    return np.vstack(camera_hits) if camera_hits else np.empty((0, 4))
-
-
-def generate_synthetic_hits_vectorized(
-    t0: float, theta: float, meta: LanesheetMetadata, lanesheet_tree
-):
-    idt = meta.dt / meta.interpolation
-    dt = meta.dt
-    exp_lanecount = estimate_lanecount_fast(meta)
-    velvec = np.array([np.cos(theta), np.sin(theta)])
-    motion_margin = idt * np.linalg.norm(velvec)
-    r_query = meta.r_e + motion_margin
-
-    exp_count_per_lane = meta.exp_flux_per_sec / exp_lanecount
-    exp_count_per_lane_per_idt = exp_count_per_lane / meta.interpolation
-    oversample_ratio = (np.pi * r_query**2) / (np.pi * meta.r_e**2)
-    adjusted_production = exp_count_per_lane_per_idt * oversample_ratio
-
-    camera_hits = []
-    pos = np.copy(meta.offset)
-    t = 0
-    halfwidth = meta.lambda_width / 2
-    while t < dt:
-        # Find nearby lightlanes (using expanded radius)
-        nearby_idxs = lanesheet_tree.query_ball_point(pos, r=r_query)
-
-        if nearby_idxs:
-            n_lightlanes = len(nearby_idxs)
-            n_photons = np.random.poisson(adjusted_production * n_lightlanes)
-            if n_photons == 0:
-                continue
-            # Vector of random time offsets within [0, idt]
-            t_offsets = np.random.uniform(0, idt, n_photons)
-            ccd_pos = np.random.uniform(-1.0, 1.0, (n_photons, 2))
-            t_samples = t0 + t + t_offsets
-
-            # Displacement along the camera path
-            displacements = np.outer(t_offsets, velvec)
-            photon_positions = pos + displacements
-            photon_lambdas = meta.lambda_center + np.random.uniform(
-                -halfwidth, halfwidth, n_photons
-            )
-
-            # Query all points at once
-            accepted_mask = np.array(
-                [
-                    len(lanesheet_tree.query_ball_point(p, r=meta.r_e)) > 0
-                    for p in photon_positions
-                ]
-            )
-
-            accepted_sheet_positions = photon_positions[accepted_mask]
-            accepted_ccd_pos = ccd_pos[accepted_mask]
-            accepted_times = t_samples[accepted_mask]
-            accepted_lambdas = photon_lambdas[accepted_mask]
-            hits = np.column_stack(
-                [
-                    accepted_times,
-                    accepted_ccd_pos,
-                    accepted_sheet_positions,
-                    accepted_lambdas,
-                ]
-            )
-            camera_hits.append(hits)
-
-        pos += velvec * idt
-        t += idt
-
-    return np.vstack(camera_hits) if camera_hits else np.empty((0, 4))
+        print(f"Error generating vectorized hits: {e}")
+        raise e

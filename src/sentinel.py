@@ -9,7 +9,7 @@ from event_processing.plotting import (
 )
 from event_processing.vartemporal_plotting import harmonic_band_plot
 from common.fitsread import (
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     read_event_data_crop_and_project_to_ccd,
     fits_save_chunk_analysis,
     fits_read,
@@ -45,7 +45,7 @@ from event_processing.var_analysis_plots import (
     SDMC_plot,
     get_uneven_time_bin_widths,
 )
-from event_processing.binning import add_time_binning
+from event_processing.binning import get_binned_datasets
 from common.generate_data import generate_synthetic_telescope_data
 import argparse
 
@@ -136,7 +136,7 @@ def main():
             binned = fits_read_cache_if_exists(cache_filename_path=cached_filename)
             logA = [f"A : Loaded cached binned data from {cached_filename}"]
         else:
-            logA, metaA, binned = add_time_binning(
+            logA, metaA, binned = get_binned_datasets(
                 pipeline=pipeline_meta, meta=metaA, pp=pp, handle="A", N=N
             )
             fits_save_cache(cached_filename, binned)

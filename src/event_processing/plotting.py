@@ -1,9 +1,11 @@
 import pandas as pd
 from scipy.optimize import curve_fit
+from scipy.stats import norm
 from common.helper import (
     get_duration,
     ensure_pipeline_folders_exists,
     get_uneven_time_bin_widths,
+    get_wavelength_bins,
 )
 from common.fitsmetadata import (
     ChunkVariabilityMetadata,
@@ -22,6 +24,7 @@ import matplotlib as mpl
 import seaborn as sns
 from typing import Optional, Tuple
 from matplotlib.colors import LogNorm
+
 
 # General typography setting
 mpl.rcParams["font.family"] = "Serif"  # Or 'Baskerville', 'Palatino Linotype', etc.
@@ -45,10 +48,50 @@ mpl.rcParams["grid.alpha"] = 0.3
 mpl.rcParams["grid.linestyle"] = "--"
 
 
+def plot_multiple_series(
+    x_vals: np.ndarray,
+    y_series: np.ndarray,
+    l0_vals: np.ndarray,
+    filename: str,
+    show=True,
+):
+    """
+    kind: 'counts_per_second' (default) or 'total_counts'
+    show_bin_widths: if True, plots steps rather than dots
+    logy: if True, y-axis will be log-scaled
+    """
+
+    # Extract wavelength and count
+
+    plt.clf()
+
+    for i in range(0, len(y_series)):
+        plt.plot(
+            x_vals,
+            y_series[i],
+            label=f"l_0: {l0_vals[i]:.2e}",
+        )
+
+    # pds = PowerDensitySpectrum(meta.spectrum, "wavelength")
+
+    plt.xlabel("Wavelength (nm)")
+    plt.ylabel("Expected lanecount")
+
+    title = f"Expected lanecount varying l0"
+
+    plt.title(title)
+    plt.grid(True)
+    plt.legend()
+
+    plt.savefig(filename, dpi=300)
+    if show:
+        plt.show()
+    plt.close()
+
+
 def plot_spectrum_vs_data(
     meta_A: FitsMetadata,
     source_A: DataFrame,
-    pp: ProcessingParameters,
     filename: str,
     meta_B: FitsMetadata = None,
     source_B: DataFrame = None,
@@ -82,7 +125,10 @@ def plot_spectrum_vs_data(
     plt.plot(
         grouped_data_A["Wavelength Center"],
         rho_empirical_A,
-        label=f"Parametric {meta_A.star} id: {meta_A.id}",
+        label=f"Parametric {meta_A.star}",
+        linestyle="--",
+        linewidth=1,
+        alpha=0.7,
     )
     duration_A = meta_A.t_max - meta_A.t_min
     grouped_data_A["Flux per sec"] = grouped_data_A["Count"] / (
@@ -93,7 +139,10 @@ def plot_spectrum_vs_data(
     plt.plot(
         grouped_data_A["Wavelength Center"],
         grouped_data_A["Flux per sec"],
-        label=f"Observed {meta_A.star} id: {meta_A.id}",
+        label=f"Observed {meta_A.star}",
+        linestyle="-",
+        linewidth=1,
+        alpha=0.7,
     )
     if meta_B is not None:
         print(f"A length : {len(source_A)} vs B Length {len(source_B)}")
@@ -103,7 +152,7 @@ def plot_spectrum_vs_data(
             .reset_index(name="Count")
         )
 
-        print(f"A length : {len(grouped_data_A)} vs B Length {len(grouped_data_B)}")
+        print(f"A wbins: {len(grouped_data_A)} vs B Wbins {len(grouped_data_B)}")
 
         # wavelength_B = grouped_data_B["Wavelength Center"]
 
@@ -119,28 +168,32 @@ def plot_spectrum_vs_data(
             meta_B.apparent_spectrum.sigma,
             meta_B.apparent_spectrum.C,
         )
-
+        # Plot both empirical and syntheti
         plt.plot(
             grouped_data_B["Wavelength Center"],
             rho_empirical_B,
             label=f"Spectrum {meta_B.star}",
+            linestyle="--",
+            linewidth=1,
+            alpha=0.7,
         )
 
-        # Plot both empirical and syntheti
         plt.plot(
-            grouped_data_A["Wavelength Center"],
-            grouped_data_A["Flux per sec"],
-            label=f"Observed {meta_B.star} id: {meta_B.id}",
+            grouped_data_B["Wavelength Center"],
+            grouped_data_B["Flux per sec"],
+            label=f"Observed {meta_B.star}",
+            linestyle="-",
+            linewidth=1,
+            alpha=0.7,
         )
 
     # pds = PowerDensitySpectrum(meta.spectrum, "wavelength")
 
     plt.xlabel("Wavelength (nm)")
-    plt.ylabel("Mean count per wavelength")
-    if meta_B is not None:
-        title = f"Mean bin count for wavelength {meta_A.id} and {meta_B.id}"
-    else:
-        title = f"Mean bin count for wavelength {meta_A.id}"
+    plt.ylabel("Hits per sec")
+
+    title = "Photon flux per sec"
+
     plt.title(title)
     plt.grid(True)
     plt.legend()
@@ -152,14 +205,15 @@ def plot_spectrum_vs_data(
     plt.close()
 
 
-def plot_pi_time_heatmap(
+def plot_wbin_time_heatmap(
     data: DataFrame,
     dt: float,
     filename: str,
+    wbins: list,
+    wbin_col: str = "Wavelength (nm)",
     show: bool = True,
-    tcol: str = "relative_time",
-    picol: str = "pi",  # e.g. "Hit" if you want to filter True hits
-    pi_bin_width: int = 1,
+    tcol: str = "time",
+    # e.g. "Hit" if you want to filter True hits
     log_scale: bool = False,  # log color scale via log10(count+1)
     cmap: str = "viridis",
     handle: str = None,
@@ -181,15 +235,13 @@ def plot_pi_time_heatmap(
     t1 = np.ceil(tmax / dt) * dt
     time_edges = np.arange(t0, t1 + dt, dt)
 
-    pi_min = int(np.floor(data[picol].min()))
-    pi_max = int(np.ceil(data[picol].max()))
-    pi_edges = np.arange(pi_min, pi_max + pi_bin_width, pi_bin_width)
+    plt.ylabel("Wavelength")
 
     # --- 2D histogram: note the order (time, PI); we transpose for imshow ---
     H, xedges, yedges = np.histogram2d(
         data[tcol].to_numpy(),
-        data[picol].to_numpy(),
-        bins=[time_edges, pi_edges],
+        data[wbin_col].to_numpy(),
+        bins=[time_edges, wbins],
     )
     # H shape: (len(time_edges)-1, len(pi_edges)-1) → transpose so rows = PI
     M = H.T
@@ -204,22 +256,25 @@ def plot_pi_time_heatmap(
     extent = (xedges[0], xedges[-1], yedges[0], yedges[-1])
 
     # --- Plot ---
-    plt.figure(figsize=(12, 6))
-    im = plt.imshow(
+
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=1000)
+    im = ax.imshow(
         M_plot,
         origin="lower",
-        aspect="auto",
+        aspect="auto",  # <-- right place
         extent=extent,
         cmap=cmap,
     )
-    plt.colorbar(im, label=cbar_label)
-    plt.xlabel("Time (s)")
-    plt.ylabel("PI channel")
-    plt.title(f"{handle} PI × Time heatmap  (dt = {dt:g}s, pi_bin = {pi_bin_width})")
-    plt.savefig(f"./plots/{filename}", dpi=300)
+
+    cbar = fig.colorbar(im, ax=ax, label=cbar_label)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Wavelength (nm)")
+    ax.set_title(f"{handle} Wavelength × Time heatmap  (dt = {dt:g}s)")
+    fig.tight_layout()
+    fig.savefig(f"./plots/{filename}", dpi=1000)
     if show:
         plt.show()
-    plt.close()
+    plt.close(fig)
 
     return
 
@@ -425,9 +480,6 @@ def plot_periodicity_winners(
     plt.close()
 
 
-import numpy as np
-
-
 def odd_even_contrast(tbins_counts, signed=False, use_pooled=False, eps=1e-12):
     """
     tbins_counts: 1D array-like of length 12 (counts per time bin, 0-indexed).
@@ -540,6 +592,7 @@ def take_top_wavelengths_per_timescale(
     time_bin_col: str = "Time Bin Width",
     wavelength_bin_col: str = "Wavelength Bin",
 ) -> pd.DataFrame:
+    print(f"take_top_wavelengths_per_timescale() N ={take_top_variability_count}")
     """
     For each time-scale bin (e.g., 'Time Bin Width'), select the top-K  wavelength bins
     ranked by the chosen variability metric.
@@ -621,11 +674,44 @@ def take_top_wavelengths_per_timescale(
     return selected
 
 
+def take_max_variability(
+    take_top_variability_count: int,
+    variability_observations: DataFrame,
+    variability_type: str,
+) -> DataFrame:
+    print(f"take_max_variability_per_wbin() {take_top_variability_count}")
+    """
+    Return up to take_top_variability_count  with the largest 'Excess Variability'.
+    """
+
+    assert variability_type in [
+        "Excess Variability",
+        "Variability Excess Adjacent",
+        "Excess Variability Smoothed",
+        "Fano Excess Local Variability",
+        "Fano Excess Global Variability",
+        "Odd even contrast",
+        "Variability Excess Smoothed Adjacent",
+    ], f"Error : Could not find {variability_type} in list of valid variability metrics"
+
+    if variability_type not in variability_observations.columns:
+        raise KeyError(
+            f"Column '{variability_type}' not found in variability_observations"
+        )
+
+    top = variability_observations.sort_values(
+        by=variability_type, ascending=False
+    ).head(take_top_variability_count)
+
+    return top
+
+
 def take_max_variability_per_wbin(
     take_top_variability_count: int,
     variability_observations: DataFrame,
     variability_type: str,
 ) -> DataFrame:
+    print(f"take_max_variability_per_wbin() {take_top_variability_count}")
     """
     Return up to take_top_variability_count rows per (Time Bin Width index, Wavelength Bin)
     with the largest 'Excess Variability'.
@@ -672,7 +758,7 @@ def take_max_variability_per_wbin(
         top = downsampled.sort_values(by="_Excess_metric", ascending=False).head(
             take_top_variability_count
         )
-        print(top.head(10))
+        # print(top.head(10))
         parts.append(top)
 
     if not parts:
@@ -699,6 +785,7 @@ def monte_carlo_chunk_variability(
     Draw N chunk-level variability observations for a given time_bin_width.
 
     """
+    # print(f"monte_carlo_chunk_variability() ")
     if rng is None:
         rng = np.random.default_rng()
 
@@ -737,7 +824,7 @@ def monte_carlo_chunk_variability(
     num_tbins = len(tbins)
     if num_tbins < chunk_len:
         raise ValueError(
-            f"Not enough time bins ({num_tbins}) for chunk length {chunk_len}."
+            f"Not enough time bins ({num_tbins}) for chunk length {chunk_len}. Try reducing the maximum time bin length"
         )
 
     # Build dict: wbin -> list of counts over time (aligned by tbin 0..num_tbins-1)
@@ -814,6 +901,7 @@ def compute_time_variability_async(
     pp: ProcessingParameters,
     time_bin_widths,
 ) -> Tuple[DataFrame, ChunkVariabilityMetadata]:
+    print(f"compute_time_variability_async() {meta.star}")
     for df in binned_datasets:
         assert (
             "Wavelength Bin" in df.columns
@@ -842,7 +930,7 @@ def compute_time_variability_async(
     # While we want more observations
     while observations < pp.chunk_counts:
         print(
-            f" -- Accumulated {observations} ({(observations/pp.chunk_counts)*100:.0f}%) chunk observations using Monte Carlo method"
+            f" Chunk Phase Sampler (CPV)| {meta.id} : Accumulated {observations} ({(observations/pp.chunk_counts)*100:.0f}%) using Monte Carlo method"
         )
         # Select a random time-bin-width among those used to cut the dataset
         tbw = np.random.randint(0, len(time_bin_widths))
@@ -867,6 +955,8 @@ def compute_time_variability_async(
 def plot_obi_van_hist(
     variability, pp: ProcessingParameters, filename, use_log_scale=True, show=True
 ):
+    filename = filename.replace(" ", "_")
+    print(f"plot_obi_van_hist() {filename}")
     # Assume df has columns 'Photon Wavelength' and 'Time Bin Width'
     plt.figure(figsize=(10, 6))
 
@@ -899,7 +989,8 @@ def plot_obi_van(
     variability, pp: ProcessingParameters, filename, use_log_scale=True, show=True
 ):
     # Ensure valid log values
-
+    filename = filename.replace(" ", "_")
+    print(f"plot_obi_van() {filename}")
     x = variability["Wavelength Center"]
     if use_log_scale:
         y = np.log(variability["Time Bin Width"])
@@ -970,6 +1061,8 @@ def plot_obi_van(
 def plot_flux_excess_variability(
     variability, pp: ProcessingParameters, filename, show=True
 ):
+    filename = filename.replace(" ", "_")
+    print(f"plot_flux_excess_variability() {filename}")
     # Ensure valid log values
     x = np.log(variability["Wavelength Center"])
 
@@ -1041,7 +1134,8 @@ def plot_flux_residual_variability_linear(
     """
     Plot the Excess Variability against wavelength on a linear scale.
     """
-
+    filename = filename.replace(" ", "_")
+    print(f"plot_flux_residual_variability_linear() {filename}")
     # Extract linear x and y values
     x = variability["Wavelength Center"]
 
@@ -1122,7 +1216,7 @@ def supression_fit(wavelength: float, A_0: float, alpha: float, delta_t: float):
     return suppression
 
 
-def power_law(
+def supressed_power_law(
     wavelength: float,
     A_0: float,
     epsilon: float,
@@ -1228,7 +1322,7 @@ def flickering_model_old(
     return amp_term * suppression
 
 
-def power_law(x, A, n):
+def simple_power_law(x, A, n):
     """Power-law function y = A * x^n"""
     return A * x**n
 
@@ -1242,6 +1336,7 @@ def plot_broken_power_law(
     use_three: bool = False,
     handle: str = "",
 ):
+    filename = filename.replace(" ", "_")
     """
     Plot the Excess Variability against wavelength and fit three power laws for different wavelength ranges,
     fitting in linear space instead of log space.
@@ -1293,13 +1388,15 @@ def plot_broken_power_law(
         if len(x_subset) > 1:  # Ensure enough points to fit
             try:
                 # Fit power-law model directly in linear space
-                popt, pcov = curve_fit(power_law, x_subset, y_subset, p0=[1e-3, -2])
+                popt, pcov = curve_fit(
+                    simple_power_law, x_subset, y_subset, p0=[1e-3, -2]
+                )
 
                 A_0_fit, epsilon_fit = popt
 
                 # Generate fitted curve
                 x_fit = np.linspace(min(x_subset), max(x_subset), 100)
-                y_fit = power_law(x_fit, A_0_fit, epsilon_fit)
+                y_fit = simple_power_law(x_fit, A_0_fit, epsilon_fit)
 
                 # Plot the power-law fit
                 plt.plot(
@@ -1345,6 +1442,7 @@ def plot_top_variability_timescales(
     reduce_stat: str = "median",  # "median" | "mean" (only for heatmap_mode="stat")
     mincnt: int = 3,  # suppress bins with too few points
 ):
+    filename = filename.replace(" ", "_")
     """
     Plot timescale sampling using a 2D hexbin heatmap instead of a dense scatter.
 
@@ -1434,13 +1532,181 @@ def plot_top_variability_timescales(
     plt.close()
 
 
+def plot_wavelength_counts_histogram(
+    event_data_A: DataFrame,
+    event_data_B: DataFrame,
+    column: str,
+    title: str,
+    pp: ProcessingParameters,
+    filename: str,
+    show: bool = False,
+    A_handle: str = "A",
+    B_handle: str = "B",
+    perc: float = None,
+):
+    try:
+        filename = filename.replace(" ", "_")
+        print(f"plot_wavelength_counts_histogram() : Filename {filename}")
+
+        assert column in event_data_A.columns, f"Missing column {column} in A"
+        assert column in event_data_B.columns, f"Missing column {column} in B"
+        assert "Wavelength Center" in event_data_B.columns, "Missing Wavelength Center"
+
+        label_x = "Wavelength center"
+        label_y = "Counts"
+
+        # Plot histogram
+        plt.figure(figsize=(8, 6))
+        counts, bins, _ = plt.hist(
+            [event_data_A[column], event_data_B[column]],
+            bins=pp.wavelength_bins,
+            color=["black", "grey"],
+            alpha=0.7,
+            label=[A_handle, B_handle],
+        )
+
+        counts_A = counts[0]
+        counts_B = counts[1]
+
+        # Use bin centers for fitting
+        bin_centers_A = 0.5 * (bins[1:] + bins[:-1])
+        bin_centers_B = 0.5 * (bins[1:] + bins[:-1])
+        print("-- Curve fitting")
+        # Fit a power law to histogram A
+        popt_A, pcov_A = curve_fit(
+            simple_power_law,
+            bin_centers_A[counts_A > 0],  # avoid log(0)
+            counts_A[counts_A > 0],
+            p0=[1e3, -2],
+        )
+        print("-- Curve fitting done")
+        a_A, b_A = popt_A
+        var_a_A, var_b_A = np.diag(pcov_A)  # extract variances
+        se_a_A, se_b_A = np.sqrt(var_a_A), np.sqrt(var_b_A)
+
+        y_fit_A = simple_power_law(bin_centers_A, a_A, b_A)
+
+        # Plot the fitted curve
+        plt.plot(
+            bin_centers_A,
+            y_fit_A,
+            linestyle="--",
+            color="red",
+            label=f"Power law A: a={a_A:.2e}, b={b_A:.2f}",
+        )
+
+        popt_B, pcov_B = curve_fit(
+            simple_power_law,
+            bin_centers_B[counts_B > 0],  # avoid log(0)
+            counts_B[counts_B > 0],
+            p0=[1e3, -2],
+        )
+        a_B, b_B = popt_B
+        var_a_B, var_b_B = np.diag(pcov_B)  # extract variances
+        se_a_B, se_b_B = np.sqrt(var_a_A), np.sqrt(var_b_A)
+
+        y_fit_B = simple_power_law(bin_centers_B, a_B, b_B)
+
+        # The difference in curves
+        delta_b = b_A - b_B
+
+        # The standard error for the delta is the square root of the summed squares
+        se_delta = np.sqrt(se_b_A**2 + se_b_B**2)
+        z = delta_b / se_delta
+        p = 2 * (1 - norm.cdf(abs(z)))  # two-sided test
+        significance = f"Top {perc}% obs. Δb = {delta_b:.3f}, p = {p:.3g}"
+
+        # Plot the fitted curve
+        plt.plot(
+            bin_centers_A,
+            y_fit_B,
+            linestyle="--",
+            color="blue",
+            label=f"Power law B: a={a_B:.2e}, b={b_B:.2f}",
+        )
+
+        plt.title(significance, fontsize=10)
+        plt.suptitle(title, y=1.05, fontsize=18)
+        plt.text(0.5, 0.1, significance, horizontalalignment="center", fontsize=10)
+        plt.xlabel(label_x)
+        plt.ylabel(label_y)
+        plt.title(f"{title}")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"./plots/{filename}", dpi=300)
+
+        if show:
+            plt.show()
+        plt.close()
+
+        return a_A, b_A, a_B, b_B, se_a_A, se_b_A, se_a_B, se_b_B, p
+
+    except Exception as e:
+        print(f"Plotting failed: {e}")
+        raise e
+
+
+def plot_chunk_variability_shape(
+    variabilityA: DataFrame,
+    variabilityB: DataFrame,
+    pp: ProcessingParameters,
+    filename: str,
+    variability_type: str = None,
+    show: bool = False,
+    handleA: str = "",
+    handleB: str = "",
+):
+    """
+    Plot a histogram of the chunk-level variability metric and fit normal distribution
+    """
+    try:
+        filename = filename.replace(" ", "_")
+        print(f"plot_chunk_variability_shape() {filename}")
+        if variability_type is None:
+            variability_type = pp.variability_type
+        assert (
+            variability_type in variabilityA.columns
+        ), f"Variability type '{variability_type}' not found in variability DataFrame columns"
+
+        wavelengths = variabilityA["Wavelength Center"]
+        obsA = variabilityA[variability_type]
+        obsB = variabilityB[variability_type]
+
+        label_x = f"{variability_type}"
+        label_y = "Counts"
+        title = f"{variability_type} shape"
+
+        plt.figure(figsize=(8, 6))
+        plt.hist(
+            [obsA, obsB],
+            bins=100,
+            color=["black", "grey"],
+            alpha=0.7,
+            label=[f"A : {handleA}", f"B : {handleB}"],
+        )
+
+        plt.xlabel(label_x)
+        plt.ylabel(label_y)
+        plt.title(title)
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"./plots/{filename}", dpi=300)
+        if show:
+            plt.show()
+        plt.close()
+    except Exception as e:
+        print(f"Plotting chunk variability shape failed: {e}")
+        raise e
+
+
 def plot_chunk_variability_excess(
     variability: DataFrame,
     pp: ProcessingParameters,
     filename: str,
     variability_type: str = None,
     show: bool = False,
-    use_old: bool = True,
     handle: str = "",
     ylim=None,
 ):
@@ -1448,7 +1714,7 @@ def plot_chunk_variability_excess(
     Plot flickering variability model and fit to excess variability data.
     """
     filename = filename.replace(" ", "_")
-    print(f"Filename {filename}")
+    print(f"plot_chunk_variability_excess:  {filename}")
     if variability_type is None:
         variability_type = pp.variability_typ
     assert (
@@ -1465,69 +1731,71 @@ def plot_chunk_variability_excess(
     plt.scatter(wavelengths, y_raw, color="black", label=variability_type)
     if ylim is not None:
         plt.ylim(ylim)
-    try:
-        # Model & Initial Guess
-        # use the simple 2-param power_law(x, A, n) defined below
-        model = power_law
 
-        # prepare numeric arrays and handle NaNs
-        wavelengths_arr = np.asarray(wavelengths, dtype=float)
-        y_raw_arr = np.asarray(y_raw, dtype=float)
+    if False:
+        try:
+            # Model & Initial Guess
+            # use the simple 2-param power_law(x, A, n) defined below
+            model = simple_power_law
 
-        # Shift to positive values for fitting (use nan-aware min)
-        if np.any(np.isfinite(y_raw_arr)):
-            mn = np.nanmin(y_raw_arr)
-            B = -mn + 1e-6 if mn < 0 else 0.0
-        else:
-            B = 0.0
-        y_shifted = y_raw_arr + B
+            # prepare numeric arrays and handle NaNs
+            wavelengths_arr = np.asarray(wavelengths, dtype=float)
+            y_raw_arr = np.asarray(y_raw, dtype=float)
 
-        # sensible initial guess: amplitude ~ median, exponent negative expected
-        A0_guess = float(
-            np.nanmedian(y_shifted[np.isfinite(y_shifted)])
-            if np.any(np.isfinite(y_shifted))
-            else 1.0
-        )
-        eps_guess = -1.0
-        initial_guess = [max(1e-8, A0_guess), eps_guess]
+            # Shift to positive values for fitting (use nan-aware min)
+            if np.any(np.isfinite(y_raw_arr)):
+                mn = np.nanmin(y_raw_arr)
+                B = -mn + 1e-6 if mn < 0 else 0.0
+            else:
+                B = 0.0
+            y_shifted = y_raw_arr + B
 
-        # allow exponent to be negative; keep amplitude >= 0
-        lower_bounds = [0.0, -np.inf]
-        upper_bounds = [np.inf, np.inf]
-        print("Last line before curve_fit!")
-        # Fit model to data (convert NaNs to numeric; curve_fit needs arrays)
-        popt, pcov = curve_fit(
-            model,
-            wavelengths_arr,
-            np.nan_to_num(y_shifted),
-            p0=initial_guess,
-            bounds=(lower_bounds, upper_bounds),
-            maxfev=10000,
-        )
+            # sensible initial guess: amplitude ~ median, exponent negative expected
+            A0_guess = float(
+                np.nanmedian(y_shifted[np.isfinite(y_shifted)])
+                if np.any(np.isfinite(y_shifted))
+                else 1.0
+            )
+            eps_guess = -1.0
+            initial_guess = [max(1e-8, A0_guess), eps_guess]
 
-        A_0, epsilon = popt
+            # allow exponent to be negative; keep amplitude >= 0
+            lower_bounds = [0.0, -np.inf]
+            upper_bounds = [np.inf, np.inf]
+            print("Last line before curve_fit!")
+            # Fit model to data (convert NaNs to numeric; curve_fit needs arrays)
+            popt, pcov = curve_fit(
+                model,
+                wavelengths_arr,
+                np.nan_to_num(y_shifted),
+                p0=initial_guess,
+                bounds=(lower_bounds, upper_bounds),
+                maxfev=10000,
+            )
 
-        print("Fitted Parameters:")
-        print(f"A_0: {A_0:.6g}, ε: {epsilon:.6g}")
+            A_0, epsilon = popt
 
-        # Reconstruct model curve and unshift
-        wavelengths_fit = np.linspace(
-            np.nanmin(wavelengths_arr), np.nanmax(wavelengths_arr), 500
-        )
-        y_fit_shifted = model(wavelengths_fit, *popt)
-        y_fit = y_fit_shifted - B
+            print("Fitted Parameters:")
+            print(f"A_0: {A_0:.6g}, ε: {epsilon:.6g}")
 
-        # Plot fitted model
-        plt.plot(
-            wavelengths_fit,
-            y_fit,
-            "r--",
-            label=f"Fit: $A$={A_0:.3g}, $n$={epsilon:.3g}",
-        )
+            # Reconstruct model curve and unshift
+            wavelengths_fit = np.linspace(
+                np.nanmin(wavelengths_arr), np.nanmax(wavelengths_arr), 500
+            )
+            y_fit_shifted = model(wavelengths_fit, *popt)
+            y_fit = y_fit_shifted - B
 
-    except RuntimeError as e:
-        print(f"Curve fitting failed: {e}")
-        plt.title(f"{title} [fit failed]")
+            # Plot fitted model
+            plt.plot(
+                wavelengths_fit,
+                y_fit,
+                "r--",
+                label=f"Fit: $A$={A_0:.3g}, $n$={epsilon:.3g}",
+            )
+
+        except RuntimeError as e:
+            print(f"Curve fitting failed: {e}")
+            plt.title(f"{title} [fit failed]")
 
     # Plot layout
     plt.xlabel("Wavelength (nm)")
@@ -1535,7 +1803,7 @@ def plot_chunk_variability_excess(
     plt.title(title)
     plt.grid(True)
     plt.legend()
-    plt.tight_layout()
+
     plt.savefig(f"./plots/{filename}", dpi=300)
     if show:
         plt.show()
@@ -1550,6 +1818,7 @@ def plot_expected_flux(
     wavelength_range=None,
     handle: str = "",
 ):
+    print(f"plot_expected_flux() : {filename}")
     xaxis = variability["Wavelength Center"]
     pp.variability_type in variability.columns, f"Metric type '{pp.variability_type}' not found in variability DataFrame columns"
     y = variability[pp.variability_type]
@@ -1593,6 +1862,7 @@ def plot_mean_count(
     wavelength_range=None,
     handle: str = "",
 ):
+    print(f"plot_mean_count() : {filename}")
     xaxis = variability["Wavelength Center"]
     assert (
         pp.variability_type in variability.columns
@@ -1635,6 +1905,7 @@ def plot_mimic(
     show: bool = True,
     handle: str = "",
 ):
+    print(f"plot_mimic() : {filename}")
     # Extract wavelength and count
     wavelength = source["Wavelength Center"]
 
@@ -1664,7 +1935,7 @@ def plot_mimic(
     )
 
     plt.xlabel("Wavelength (nm)")
-    plt.ylabel("Mean count per wavelength")
+    plt.ylabel("Photon flux per sec")
     plt.title("Mean bin count for wavelength")
     plt.grid(True)
     plt.legend()
@@ -1683,7 +1954,7 @@ def plot_shot_noise_variability(
     handle: str = "",
 ):
     # Plot Excess Variability vs wavelength
-
+    print(f"plot_shot_noise_variability : {filename}")
     xaxis = variability["Wavelength Center"]
     if pp.variability_type not in variability.columns:
         raise ValueError(
@@ -1726,6 +1997,7 @@ def plot_excess_variability_smoothed(
     show=False,
     handle: str = "",
 ):
+    print(f"plot_excess_variability_smoothed : {filename}")
     if pp.variability_type not in variability.columns:
         raise ValueError(
             f"Metric type '{pp.variability_type}' not found in variability DataFrame columns"

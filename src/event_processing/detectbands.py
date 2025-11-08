@@ -12,9 +12,9 @@ from common.fitsmetadata import (
     ComparePipeline,
 )
 
-from event_processing.binning import add_time_binning
+from event_processing.binning import get_binned_datasets
 from common.fitsread import (
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     read_event_data_crop_and_project_to_ccd,
     fits_save_chunk_analysis,
     fits_read,
@@ -281,7 +281,7 @@ def analyze_bands(
         .reset_index(name="Counts")
         .rename(columns={"index": time_binning_column})
     )
-    print(counts_per_tbin.head(100))
+    # print(counts_per_tbin.head(100))
     # Sort the list so that the wbins and time-bins are sorted
     counts_per_tbin = counts_per_tbin.sort_values([time_binning_column])
 

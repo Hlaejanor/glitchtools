@@ -15,7 +15,7 @@ from event_processing.vartemporal_plotting import (
     vartemporal_plot,
 )
 from common.fitsread import (
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     read_event_data_crop_and_project_to_ccd,
     fits_save_chunk_analysis,
     fits_read,
@@ -55,7 +55,7 @@ from event_processing.var_analysis_plots import (
     SDMC_plot,
     get_uneven_time_bin_widths,
 )
-from event_processing.binning import add_time_binning
+from event_processing.binning import get_binned_datasets
 from common.generate_data import generate_synthetic_telescope_data
 import argparse
 
@@ -376,7 +376,7 @@ def main():
 
             logA = [f"A : Loaded cached binned data from {cached_filename}"]
         else:
-            logA, metaA, binnedA = add_time_binning(
+            logA, metaA, binnedA = get_binned_datasets(
                 pipeline=pipeline_meta, meta=metaA, pp=pp, handle="A", N=N
             )
             fits_save_cache(cached_filename, binnedA)
@@ -406,7 +406,7 @@ def main():
             binnedB = fits_read_cache_if_exists(cache_filename_path=cached_filename)
             logB = [f"B : Loaded cached binned data from {cached_filename}"]
         else:
-            logB, metaA, binnedB = add_time_binning(
+            logB, metaA, binnedB = get_binned_datasets(
                 pipeline=pipeline_meta, meta=metaA, pp=pp, handle="B", N=N
             )
             fits_save_cache(cached_filename, binnedB)
@@ -444,10 +444,10 @@ def main():
             A_winners.extend(A_winner)
             B_winners.extend(B_winner)
 
-        filename = f"plots/{pipeline_meta.id}/period_winners_A_{metaA.id}.png"
+        filename = f"plots/{pipeline_meta.id}/period_winners_A.png"
         plot_periodicity_winners(A_winners, None, wave_centers, filename, True)
 
-        filename = f"plots/{pipeline_meta.id}/period_winners_B_{metaB.id}.png"
+        filename = f"plots/{pipeline_meta.id}/period_winners_B.png"
         plot_periodicity_winners(None, B_winners, wave_centers, filename, True)
 
     print("LOG : ")

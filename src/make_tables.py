@@ -13,11 +13,11 @@ from event_processing.plotting import (
     take_max_variability_per_wbin,
     take_top_wavelengths_per_timescale,
     plot_top_variability_timescales,
-    plot_pi_time_heatmap,
+    plot_wbin_time_heatmap,
     plot_ccd_bin,
 )
 from common.fitsread import (
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     read_event_data_crop_and_project_to_ccd,
     fits_save_chunk_analysis,
     fits_read,
@@ -62,7 +62,7 @@ from event_processing.var_analysis_plots import (
     plot_chunk_variability_excess,
 )
 from event_processing.binning import (
-    add_time_binning,
+    get_binned_datasets,
     load_or_compute_chunk_variability_observations,
     load_source_data,
 )
@@ -101,7 +101,7 @@ def parse_arguments():
     return args
 
 
-def get_variability_type(hash: str, df: DataFrame):
+def filter_variability_metrics(hash: str, df: DataFrame):
     cols = [
         "date",
         "pp_hash",
@@ -121,28 +121,45 @@ def get_variability_type(hash: str, df: DataFrame):
         "ci95_p_hat_high",
         "comparing_to_self",
         "significant",
+        "cherrypick",
+        "test_mean_var",
+        "null_mean_var",
+        "test_median_var",
+        "null_median_var",
     ]
 
-    hash_controls = [hash]
-    positive_controls = ["anisogen2_vs_rnd_anisogen2", "antares_vs_rnd_antares"]
-
-    test_controls = ["antares_vs_rnd_antares"]
     for c in cols:
         assert c in df.columns, f"Require {c} in columns"
 
+    all_pipes = list(df["pipeline_id"].unique())
+    negative_controls = [
+        "rnd_antares_vs_rnd_antares",
+        "rnd_isogen_vs_rnd_isogen",
+        "rnd_isogen_vs_rnd_antares",
+    ]
+    test_controls = ["antares_vs_rnd_antares", "antares_vs_isogen"]
+    positive_controls = []
+    for pipe in all_pipes:
+        if pipe not in negative_controls and pipe not in test_controls:
+            positive_controls.append(pipe)
+
     sig = df["significant"].astype(bool)
-    pos_mask = df["pipeline_id"].isin(positive_controls)
+    not_sig = [not b for b in sig]
+    pos_control = df["pipeline_id"].isin(all_pipes)
+
+    expected_null = df["expecting_null"].astype(bool)
 
     # Obtain the variability types that work in the positive control
-    vartypes_pos = df.loc[(sig & pos_mask), "variability_type"].unique()
-    negative_controls = ["rnd_anisogen2_vs_rnd_anisogen2", "rnd_antares_vs_rnd_antares"]
-    same_as_pos_mask = df["variability_type"].isin(vartypes_pos)
-    neg_mask = df["pipeline_id"].isin(negative_controls)
-    hash_mask = df["pp_hash"].isin(hash_controls)
+    vartypes_pos = df.loc[(sig & pos_control), "variability_type"].unique()
+    vartypes_neg = df.loc[(not_sig & expected_null), "variability_type"].unique()
+    usable = []
+    for vartype_neg in vartypes_neg:
+        for vartype_pos in vartypes_pos:
+            if vartype_pos == vartype_neg:
+                usable.append(vartype_neg)
 
-    use = ((sig & pos_mask) | ((~sig) & neg_mask)) & hash_mask & same_as_pos_mask
-
-    return df.loc[use], vartypes_pos
+    use = (sig & pos_control) | ((not_sig) & expected_null)
+    return df.loc[use], usable
 
 
 def run_pipeline(pp: ProcessingParameters):
@@ -150,13 +167,17 @@ def run_pipeline(pp: ProcessingParameters):
         csv_file = f"files/tail_exceedance_test_{pp.get_hash()}.csv"
         csv = read_from_csv(csv_file)
 
-        table, accepted_vartypes = get_variability_type(pp.get_hash(), csv)
+        # Produce a list of the observations that belong to a variability type that
+        # fulfills the criteria of specificy and sensitivity
+        table, accepted_vartypes = filter_variability_metrics(pp.get_hash(), csv)
         print(
             f"The following var-types can be used as statistically significant",
             accepted_vartypes,
         )
-        latex_table_filename = f"files/statistical_test.tex"
-        print(table.columns)
+
+        table = table.sort_values["Variability type", "p_value_binomial"]
+        latex_table_filename = f"files/statistical_tests.tex"
+
         columns_keep = [
             "A",
             "B",

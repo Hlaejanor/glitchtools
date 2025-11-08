@@ -36,14 +36,14 @@ def ensure_pipeline_folders_exists(meta: ComparePipeline):
     success = True
     try:
         if os.path.isdir(path):
-            print(f"Creating folder")
+            print(f"Creating folder {path}")
             success = True
         else:
-            print(f"Creating folder")
+            print(f"Creating folder {path}")
             os.mkdir(path)
             success = True
         if os.path.isdir(path2):
-            print(f"Creating folder {path}")
+            print(f"Creating folder {path2}")
             success = True
         else:
             print(f"Creating folder {path2}")
@@ -57,14 +57,8 @@ def ensure_pipeline_folders_exists(meta: ComparePipeline):
         return False
 
 
-def get_duration(meta: FitsMetadata, pp: ProcessingParameters):
-    if pp.take_time_seconds:
-        assert (
-            pp.take_time_seconds < meta.t_max * 1.03
-        ), f"Cannot take first {pp.take_time_seconds} seconds, because it is more than total length of {meta.t_max} seconds"
-        duration = pp.take_time_seconds
-    else:
-        duration = meta.t_max - meta.t_min
+def get_duration(meta: FitsMetadata | GenerationParameters):
+    duration = meta.t_max - meta.t_min
 
     return duration
 
@@ -75,7 +69,7 @@ def get_wavelength_bins(pp: ProcessingParameters):
         pp.max_wavelength,
         pp.wavelength_bins + 1,
     )
-    print("Bin edges:", wave_edges)
+    # print("Bin edges:", wave_edges)
     wave_centers = 0.5 * (wave_edges[:-1] + wave_edges[1:])
     wave_widths = np.diff(wave_edges)
 
@@ -84,12 +78,18 @@ def get_wavelength_bins(pp: ProcessingParameters):
 
 def get_uneven_time_bin_widths(pp: ProcessingParameters):
     # Using the ProcessingParameters, figure out what to do
-    if pp.time_bin_widths_count is None or pp.take_time_seconds == 1:
+    if pp.time_bin_widths_count is None or pp.end_time_seconds == 1:
         print("Using only one time-bin width")
         bin_widths = [pp.time_bin_seconds]
     else:
-        print("Generating unevenly spaced ")
-        t_bin_width_range = pp.time_bins_to - pp.time_bins_from
+        print(
+            f"Generating {pp.time_bin_widths_count} time-bin widths that fill the space, dont overlap but have "
+        )
+
+        bin_widths = np.random.uniform(
+            pp.time_bins_from, pp.time_bins_to, pp.time_bin_widths_count
+        )
+        """
         t_bin_width_increment = t_bin_width_range / pp.time_bin_widths_count
         bin_widths = np.zeros(pp.time_bin_widths_count)
         bin_widths[0] = pp.time_bins_from
@@ -100,9 +100,9 @@ def get_uneven_time_bin_widths(pp: ProcessingParameters):
             bin_widths[i] = bin_widths[i - 1] + (
                 t_bin_width_increment * np.random.uniform(0.7, 1.3)
             )
-
+        """
         print(
-            f"Using {pp.time_bin_widths_count} widths, ranging from {pp.time_bins_from} to {pp.time_bins_to} seconds"
+            f"Using {pp.time_bin_widths_count} randomly drawn time-bin widths, ranging from {pp.time_bins_from} to {pp.time_bins_to} seconds"
         )
 
     return bin_widths
@@ -187,6 +187,82 @@ def compare_variability_profiles(
     return summary
 
 
+def estimate_lanecount(ls: LanesheetMetadata):
+    """
+    Estimate the expected number of lightlanes in a cross section.
+
+    Parameters
+    ----------
+    ls : LanesheetMetadata
+        Metadata object containing lane parameters (r_e, alpha, lucretius, lambda_center).
+
+    Returns
+    -------
+    float
+        Estimated count of lightlanes based on geometric and physical parameters.
+    """
+    # Size of the lightlane cross section for a circular AGN
+    area_lane = np.pi * ls.r_e**2
+
+    # Great sphere area at distance ls.alpha in units of light-seconds quared
+    gsa = 4 * np.pi * ls.alpha**2
+
+    # This is the lane-density or scalar that connects the wavelength in light-seconds to the lane-complexity.
+    # It means that each light-second of wavelength increases the number of possible directions by 10e9
+    l_0 = ls.lucretius
+
+    # beta : scalar, fundamental constant, not determined
+    # Converts wavelength (in light-seconds) to equivalent discrete cell length (unitless).
+    # Obtaint the wavelength in light-seconds
+    lamb_ls = ls.lambda_center_ls()
+
+    # How that compelxity translates into distinct angular directions
+
+    N = 4 * (lamb_ls * l_0) ** 2 + 2
+
+    # Divide great sphere area into N lane-centers
+    gsa_per_lane = gsa / N
+
+    exp_lanecount = area_lane / gsa_per_lane
+
+    exp_lanecount_2 = (
+        ls.r_e**2 / ls.alpha**2
+    ) * l_0**2 * lamb_ls**2 + ls.r_e**2 / (2 * ls.alpha**2)
+
+    assert (
+        exp_lanecount_2 - exp_lanecount
+    ) < 0.00000001, "The two formats should be the same"
+    # Assuming that the great circle alottment to each lane is circular, appropriate in the average case,
+    # we can find the diamater of that circle, which must equal the grid distance
+    g = np.sqrt(gsa_per_lane / np.pi) * 2
+    print(
+        f"λ_ls={lamb_ls:.3e}, l0={l_0:.3e}, λ*l0={lamb_ls*l_0:.3e}, N={N:.3e}, l_0={l_0}"
+    )
+    return exp_lanecount, g
+    # Grid size : Increases with alpha and falls off with stronger negative lucretius parameter
+    # g = ls.alpha * np.exp(ls.lucretius * ls.lambda_center_ls())
+
+
+def nm_to_lightseconds_scalar():
+    """
+    Return the scalar K that converts nanometers to light-seconds.
+    Formula: K = (1e-9 m) / c
+    """
+    c = 299_792_458  # speed of light in m/s (exact by definition)
+    beta = 1e-9 / c
+    return beta
+
+
+def agn_xray_radius_lightseconds(M_Msun=3.16227766e7, k=40):
+    """
+    M_Msun : The average number of suns in the avearge of a galaxy in the univere. This corresponds to the average AGN in in the unresolved background
+    k : The X-ray–emitting region (the compact corona + innermost disk) is typically only tens of gravitational radii across
+
+    returns : The x-ray radius of the X-ray emitting corona light-seconds
+    """
+    return (4.927e-6 * k * M_Msun) / 2
+
+
 def estimate_lanecount_fast(ls: LanesheetMetadata):
     """
     Estimate the expected number of lightlanes in a cross section.
@@ -208,7 +284,7 @@ def estimate_lanecount_fast(ls: LanesheetMetadata):
     # Area between lightlane center is a hexagonal grid. Each hexagon has an area equal to
     g_hex_cell = (np.sqrt(3) / 2) * g**2
     # Expected lightlane count is equal to the share of the lightlane cross section divided by the hex cell
-    return area_lane / g_hex_cell
+    return area_lane / g_hex_cell, g
 
 
 def rho_empirical(lambda_nm, A=385, lambda_0=0.38, sigma=0.77, C=5.0):
@@ -437,11 +513,11 @@ def write_result_to_csv(result: dict, filename):
 
 
 def split_into_time_bins(dataset, bins=100, seed=None):
-    t_min = dataset["relative_time"].min()
-    t_max = dataset["relative_time"].max()
+    t_min = dataset["time"].min()
+    t_max = dataset["time"].max()
     bin_edges = np.linspace(t_min, t_max, bins + 1)
 
-    dataset["time_bin"] = pd.cut(dataset["relative_time"], bins=bin_edges, labels=False)
+    dataset["time_bin"] = pd.cut(dataset["time"], bins=bin_edges, labels=False)
 
     # Group by the "time_bin" column and get row indices for each bin
     bin_indices = [group.index.to_numpy() for _, group in dataset.groupby("time_bin")]

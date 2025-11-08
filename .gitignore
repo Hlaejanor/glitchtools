@@ -1,4 +1,5 @@
 venv
+files
 *.mp4
 fits/*
 cleanup

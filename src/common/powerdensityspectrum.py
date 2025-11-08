@@ -81,14 +81,16 @@ def compute_spectrum_params_old(
         raise Exception("Spectrum fitting failed.") from e
 
 
-def compute_spectrum_params(meta, pp, source_data):
+def compute_spectrum_params(
+    meta: FitsMetadata, source_data: DataFrame
+) -> tuple[Spectrum, float]:
     # Preconditions
     assert (
         "Wavelength Center" in source_data.columns
     ), "source_data must be pre-binned by wavelength"
     assert "Wavelength Width" in source_data.columns, "missing 'Wavelength Width'"
 
-    duration = get_duration(meta, pp)
+    duration = get_duration(meta)
 
     # Group -> flux density
     grouped = (
@@ -96,6 +98,7 @@ def compute_spectrum_params(meta, pp, source_data):
         .size()
         .reset_index(name="Count")
     )
+
     grouped = grouped.sort_values("Wavelength Center").reset_index(drop=True)
 
     lam = grouped["Wavelength Center"].to_numpy(dtype=float)  # nm

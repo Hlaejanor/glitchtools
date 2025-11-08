@@ -49,10 +49,13 @@ class Spectrum:
 @dataclass
 class ComparePipeline:
     id: str
+    source: str | None
     A_fits_id: str
     B_fits_id: str
     pp_id: str
-    gen_id: str
+    gen_id: str | None
+    A_tasks: list[str] | None = field(default_factory=lambda: [])
+    B_tasks: list[str] | None = field(default_factory=lambda: [])
 
     def dict(self):
         return {k: v for k, v in asdict(self).items()}
@@ -70,7 +73,8 @@ class ProcessingParameters:
     time_bins_to: float
     time_bin_widths_count: float
     time_bin_chunk_length: int
-    take_time_seconds: int
+    start_time_seconds: int
+    end_time_seconds: int
     anullus_radius_inner: float
     anullus_radius_outer: float
     processed_filename: str
@@ -95,7 +99,8 @@ class ProcessingParameters:
 
     def to_string(self):
         return f"""Processing params : \n 
-        Take first seconds :  {self.take_time_seconds} \n
+        Start from seconds :  {self.start_time_seconds} \n
+        End at seconds :  {self.end_time_seconds} \n
         Virtual CCD resolution : {self.resolution} \n 
         Max lambda : {self.max_wavelength} \n 
         Min lambda : {self.min_wavelength} \n 
@@ -122,7 +127,7 @@ class ProcessingParameters:
     # Including these would lead to cahche invalidation too early
     def to_string_cachebreaker(self):
         return f"""Processing params : \n 
-        Take first seconds :  {self.take_time_seconds} \n
+        Take first seconds :  {self.end_time_seconds} \n
         Virtual CCD resolution : {self.resolution} \n 
         Max lambda : {self.max_wavelength} \n 
         Min lambda : {self.min_wavelength} \n 
@@ -160,25 +165,28 @@ class ProcessingParameters:
 @dataclass
 class GenerationParameters:
     id: str
-    alpha: float  # The scalar strength of the grid falloff
-    lucretius: float  # The exponent for the grid/wavelength relation
-    r_e: float  # Size of the r_e emitter
+    empirical: bool  # Set to true if the alpha and r_e parameters are given in distance light-seconds, and velocity is given as share of speed of light (c). Usage of the updated Lightlane coverage function depends on this
+    alpha: float  # The distance to the x-ray emitting object in light-secondss
+    lucretius: float  # The exponent for the grid/wavelength relation. Theoretically -1
+    r_e: float  # Size of the r_e emitter in light-seconds
     theta: float  # Start-angle across the lanesheet (radians)
     theta_change_per_sec: float  # Change in theta per second (radians)
     t_min: float  # Lowest time in the dataset
     t_max: int  # Length of observatin
     perp: float  # The position perpendicular to [0,0] through theta
     phase: float  # The position paralell to the camera path from [0, 0]
-    max_wavelength: float
-    min_wavelength: float
+    max_wavelength: float  # Wavelength maximum in nanometers
+    min_wavelength: float  # Wavelength minimum in nanometers
     star: str
     raw_event_file: str = None
     spectrum: Spectrum = field(default_factory=lambda: Spectrum(0, 0, 0, 0))
+    velocity: float = 0.12  # [0, 1]: The velocity transverse to the Lanesheet as a percentage of the speed of light, commonly assumed to be approx 0.12c
 
     def to_string(self):
         return f"""Generation params : \n 
         Id :  {self.id} \n
-        Alpha : {self.alpha} \n 
+        Velocity : {self.velocity} \n 
+        Alpha : {self.alpha} \n
         Lucretius : {self.lucretius} \n 
         Curvature change per sec : {self.theta_change_per_sec} \n,
         r_e : {self.r_e} \n 

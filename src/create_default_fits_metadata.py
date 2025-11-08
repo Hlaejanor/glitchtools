@@ -22,7 +22,7 @@ from common.metadatahandler import (
 from common.helper import compare_variability_profiles
 from common.fitsread import (
     read_event_data_crop_and_project_to_ccd,
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     fits_read,
     fits_save,
 )

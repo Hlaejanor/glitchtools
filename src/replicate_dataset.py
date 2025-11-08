@@ -20,10 +20,10 @@ from common.metadatahandler import (
     load_chunk_metadata,
     save_chunk_metadata,
 )
-from event_processing.binning import add_time_binning
+from event_processing.binning import get_binned_datasets
 from common.helper import compare_variability_profiles
 from common.fitsread import (
-    fits_save_events_generated,
+    fits_save_events_with_pi_channel,
     read_event_data_crop_and_project_to_ccd,
     fits_save_chunk_analysis,
     fits_read,
@@ -57,25 +57,35 @@ import argparse
 
 
 def parse_arguments(use_defaults: bool):
-    default_pipeline = "anisogen_vs_rnd_anisogen"
-    default_pipeline = "antares_vs_anisogen2"
-    default_pipeline = "antares_vs_anisogen"
-    default_pipeline = "isogen_vs_rnd_isogen"
-    default_pipeline = "antares_vs_isogen"
-    default_pipeline = "antares_vs_anisogen"
-    default_pipeline = "antares_vs_anisogen2"
-    default_pipeline = "anisogen_vs_rnd_anisogen"
     parser = argparse.ArgumentParser(
-        description="Create mimic dataset: Generate synthetic data variants."
+        description="Create mimic dataset: Generate synthetic dataset B to mimic real dataset A"
     )
     if use_defaults:
         parser.add_argument(
-            "-p",
-            "--pipeline",
+            "-s",
+            "--source",
             required=not use_defaults,
-            default=default_pipeline if use_defaults else None,
+            default="antares",
             type=str,
-            help="Set the pipeline you want to run",
+            help="Select a source dataset",
+        )
+
+        parser.add_argument(
+            "-g",
+            "--gen_id",
+            required=not use_defaults,
+            default="anisogen",
+            type=str,
+            help="Select a generation parameters",
+        )
+
+        parser.add_argument(
+            "-pp",
+            "--pp",
+            required=not use_defaults,
+            default="default",
+            type=str,
+            help="Select a processing parameters",
         )
 
     args = parser.parse_args()
@@ -113,7 +123,8 @@ def create_default_pipeline():
         min_wavelength=0.1,
         wavelength_bins=10,
         time_bin_seconds=100,
-        take_time_seconds=10000,
+        start_time_seconds=0,
+        end_time_seconds=10000,
         anullus_radius_inner=None,
         anullus_radius_outer=None,
         padding_strategy=False,
@@ -125,10 +136,11 @@ def create_default_pipeline():
         id="test_1",
         alpha=3.0,
         lucretius=-1,
+        velocity=1.0,
         theta_change_per_sec=0.0,
         r_e=0.8,
         theta=0.51,
-        t_max=pparam.take_time_seconds,
+        t_max=pparam.end_time_seconds,
         perp=0.0,
         phase=0.0,
         max_wavelength=1.0,
@@ -158,71 +170,60 @@ def create_default_pipeline():
 def main(use_defaults=False, generate: bool = True):
     print("Create mimic dataset")
 
-    #  Ensure that the default pipeline is present
-    # create_default_pipeline()
-
     # Parse command line arguments
     args = parse_arguments(use_defaults)
-    assert (
-        args.pipeline is not None
-    ), "Pipeline meta missing. Try to run create_default_pipeline.sh"
-    # Load the default or specified pipeline
-    pipe = load_pipeline(args.pipeline)
-    # Load the processing params
-    pp = load_processing_param(pipe.pp_id)
-    assert pp is not None, "Processing param was none"
-    # Load the generation parameter from the pipeline
-    genparam = load_gen_param(pipe.gen_id)
+
+    genparam = load_gen_param(args.gen_id)
     assert genparam is not None, "Generation parameters must be set"
+    pp = load_processing_param(args.pp)
+    assert pp is not None, "Processing parameters must be set"
 
     # Load metadata for target set A
-    meta_A = load_fits_metadata(pipe.A_fits_id)
-    log_A, meta_A, source_A = load_source_data(meta_A, pp)
-    filename = f"plots/{pipe.id}/plot_spectrum_{meta_A.id}.png"
+    source_meta = load_fits_metadata(args.source)
+    log_A, source, source_A = load_source_data(source_meta, pp)
+    filename = f"plots/spectra/{source.id}.png"
     # Show that the computed spectrum matches the actual data
     plot_spectrum_vs_data(
-        meta_A=meta_A,
-        source_A=source_A,
-        pp=pp,
+        meta_A=source_meta,
+        source_A=source,
         filename=filename,
         show=False,
     )
 
-    """
-    # Apply binning according to specs in ProcessingParameters
-    logA, meta_A, binned_datasets = load_event_file_and_apply_binning(
-        pipeline=pipe, source_data=source_A, meta=meta_A, pp=pp, handle="A"
+    estimated_spectrum, r_squared = compute_spectrum_params(
+        meta=source_meta, pp=pp, source_data=source_A
     )
-    """
+    source_meta.apparent_spectrum = estimated_spectrum
+    genparam.spectrum = source.apparent_spectrum
 
-    if generate:
-        print(f"Generating synthetic dataset B")
-        # Ensure that the generation parameters uses the same spectrum as the target dataset
-        genparam.spectrum = meta_A.apparent_spectrum
-        # Ensure that we don't generate more data than necessary
-        genparam.t_max = meta_A.t_max
-        # Save the generation params
-        save_gen_param(genparam)
-        # Generate a synthetic event file using B_gen, which include the spectrum and duration
-        B_events = generate_synthetic_telescope_data(genparam, pp.wavelength_bins)
-        # Save the the generated dataset as a fits file
-        meta_B = fits_save_events_generated(B_events, genparam)
-        # Update the pipeline with reference to the new fits file
-        pipe.B_fits_id = meta_B.id
-        # Save the pipeline
-        save_pipeline(pipe)
-    else:
-        # If we skip generation, load the pipeline metadata
-        meta_B = load_fits_metadata(pipe.B_fits_id)
+    genparam.t_max = source.t_max
+    genparam.t_min = source.t_min
 
-    log_B, meta_B, source_B = load_source_data(meta_B, pp)
-    filename = f"plots/{pipe.id}/plot_spectrum_A_{meta_A.id}_vs_B_{meta_B.id}.png"
+    genparam.t_max = source.t_max
+    genparam.t_min = source.t_min
+    # Save the generation params
+    save_gen_param(genparam)
+    # Generate a synthetic event file using B_gen, which include the spectrum and duration
+    generated_events_arr = generate_synthetic_telescope_data(
+        genparam, pp.wavelength_bins
+    )
+    #
+    generated_events = pd.DataFrame(generated_events_arr, columns=source_A.columns)
+    # Save the the generated dataset as a fits file
+    generated_meta, generated_events = fits_save_events_with_pi_channel(
+        generated_events, genparam
+    )
+    # Update the pipeline with reference to the new fits file
+    save_fits_metadata(source_meta)
+    save_gen_param(genparam)
+
+    filename = f"plots/spectra/{source_meta.id}_vs_{generated_meta.id}.png"
     # Show that the computed spectrum matches the actual data
     plot_spectrum_vs_data(
-        meta_A=meta_A,
+        meta_A=source,
         source_A=source_A,
-        meta_B=meta_B,
-        source_B=source_B,
+        meta_B=generated_meta,
+        source_B=generated_events,
         pp=pp,
         filename=filename,
         show=False,
@@ -232,4 +233,4 @@ def main(use_defaults=False, generate: bool = True):
 
 
 if __name__ == "__main__":
-    main(use_defaults=True, generate=True)
+    main(use_defaults=True)

@@ -14,8 +14,6 @@ from common.powerdensityspectrum import PowerDensitySpectrum, compute_spectrum_p
 from event_processing.vartemporal_plotting import vartemporal_plot
 from event_processing.plotting import (
     plot_broken_power_law,
-    plot_excess_variability,
-    plot_excess_variability_smoothed,
     plot_expected_flux,
     plot_chunk_variability_excess,
     plot_flux_excess_variability,

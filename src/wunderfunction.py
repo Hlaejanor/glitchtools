@@ -45,7 +45,7 @@ def evaluate_lightlane_score(
     params : list
         [x0, y0, theta, alpha, lucretius]
     df : pd.DataFrame
-        Input photon dataset with columns 'relative_time', 'CCD X', 'CCD Y', 'Wavelength (nm)'
+        Input photon dataset with columns 'time', 'CCD X', 'CCD Y', 'Wavelength (nm)'
     g_bias_weight : float
         Controls how strongly to penalize small g values.
     use_median : bool
@@ -68,7 +68,7 @@ def evaluate_lightlane_score(
         phase=params[0],
         perp=params[1],
         theta=params[2],
-        alpha=params[3],
+        velocity=params[3],
         lucretius=params[4],
         r_e=params[5],
     )
@@ -97,13 +97,14 @@ def objective_with_data(params, data, i):
 
 
 def count_lightlanes_intersecting_camera_vectorized(
-    times, phase, perp, theta, alpha, lucretius, particle_lambdas, r_e
+    times, phase, perp, theta, velocity, lucretius, particle_lambdas, r_e
 ):
+    raise Exception("This method is unsafe, needs to be checked")
     """
     Vectorized version to compute how many lightlanes intersect the camera center at each time t.
     """
 
-    # Camera velocity vector
+    # Camera unit vector
     v = np.array([np.cos(theta), np.sin(theta)])
 
     # Camera positions at each time
@@ -112,7 +113,7 @@ def count_lightlanes_intersecting_camera_vectorized(
     )  # shape (N, 2)
 
     # Grid spacing g at each time
-    g_vals = alpha / (particle_lambdas**lucretius)
+    g_vals = 1 / (velocity * particle_lambdas**lucretius)
 
     # Preallocate result
     lanecounts = np.zeros_like(times, dtype=int)
@@ -312,6 +313,7 @@ if __name__ == "__main__":
         id=f"{meta.id}_rec",
         alpha=best_params[3],
         lucretius=best_params[4],
+        velocity=None,  # TODO FIX
         r_e=0.8,  # fixed
         theta=best_params[2],
         t_max=meta.t_max,

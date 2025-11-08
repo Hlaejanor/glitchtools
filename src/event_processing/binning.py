@@ -6,6 +6,8 @@ from common.fitsmetadata import (
     ComparePipeline,
 )
 import os
+import numpy as np
+import pandas as pd
 from common.fitsread import (
     read_event_data_crop_and_project_to_ccd,
     get_cached_filename,
@@ -13,18 +15,17 @@ from common.fitsread import (
     fits_save_cache,
     save_chunk_metadata,
 )
-import numpy as np
-import pandas as pd
-
 from common.metadatahandler import save_fits_metadata, load_chunk_metadata
 from common.powerdensityspectrum import PowerDensitySpectrum, compute_spectrum_params
-from common.helper import get_uneven_time_bin_widths
+from common.helper import get_uneven_time_bin_widths, get_wavelength_bins
 from tabulate import tabulate
 from pandas import DataFrame
 from event_processing.plotting import (
     compute_time_variability_async,
     take_max_variability_per_wbin,
 )
+from typing import Optional, Tuple
+import asyncio
 
 
 def load_or_compute_chunk_variability_observations(
@@ -48,18 +49,18 @@ def load_or_compute_chunk_variability_observations(
 
         log, meta, source = load_source_data(meta, pp)
 
-        log, meta, binned_datasets, time_bin_widths = add_time_binning(
-            pipeline=pipe, source_data=source, meta=meta, pp=pp, handle=handle
+        log, meta, binned_datasets, time_bin_widths = get_binned_datasets(
+            source_data=source, meta=meta, pp=pp, handle=handle
         )
         # The name of the chunk dataset for this observation
-
         variability_observations, chunk_meta = compute_time_variability_async(
             binned_datasets=binned_datasets,
             meta=meta,
             pp=pp,
             time_bin_widths=time_bin_widths,
         )
-        print(variability_observations.head(200))
+
+        # print(variability_observations.head(200))
         fits_save_cache(cached_filename, variability_observations)
         save_chunk_metadata(chunk_meta)
         # set chunk_variability to the just-computed table so downstream code can use it
@@ -93,11 +94,11 @@ def load_source_data(
         success, meta, pp, source_data = read_event_data_crop_and_project_to_ccd(
             meta.id, pp.id
         )
-        source_data = add_wavelength_bin_columns(meta, pp, source_data)
-        meta.t_max = int(source_data["relative_time"].max())
-        meta.t_min = int(source_data["relative_time"].min())
+        source_data = add_wavelength_bin_columns(pp, source_data)
+        meta.t_max = int(source_data["time"].max())
+        meta.t_min = int(source_data["time"].min())
         # Compute the spectrum if for some reason this was not already set
-        meta.apparent_spectrum, _ = compute_spectrum_params(meta, pp, source_data)
+        meta.apparent_spectrum, _ = compute_spectrum_params(meta, source_data)
         # Save the spectrum params
         source_data_is_cached, cached_filename = get_cached_filename("source", meta, pp)
         fits_save_cache(cached_filename, source_data)
@@ -110,8 +111,7 @@ def load_source_data(
     )
 
 
-def add_time_binning(
-    pipeline: ComparePipeline,
+def get_binned_datasets(
     source_data: DataFrame,
     meta: FitsMetadata,
     pp: ProcessingParameters,
@@ -138,92 +138,24 @@ def add_time_binning(
     return log, meta, binned_datasets, time_bin_widths
 
 
-def equalize_wavelength_bins(data: DataFrame):
-    print(
-        "Upsample strategy 'equalize' indicated. Will duplicate observations until all bins have the same nuber of counts as the maximum count"
-    )
-    bin_counts = data["Wavelength Bin"].value_counts().sort_index()
-    max_count = bin_counts.max()
-    # Step 2: Determine how many photons are missing in each bin
-    padding_needed = max_count - bin_counts
-
-    # Step 3: Create padded dataset
-    padding_hits = []
-
-    for bin_val, missing_count in padding_needed.items():
-        if missing_count > 0:
-            bin_df = data[data["Wavelength Bin"] == bin_val]
-            if not bin_df.empty:
-                sampled = bin_df.sample(n=missing_count, replace=True).copy()
-                # Jitter time by +/- 10% of the time range in that bin
-                jitter_range = 1.0 * (
-                    sampled["relative_time"].max() - sampled["relative_time"].min()
-                )
-                sampled["relative_time"] += np.random.uniform(
-                    -jitter_range, jitter_range, size=missing_count
-                )
-                padding_hits.append(sampled)
-
-    # Step 4: Combine original and padding datasets
-    if len(padding_hits) > 0:
-        padding_df = pd.concat(padding_hits, ignore_index=True)
-        data = pd.concat([data, padding_df], ignore_index=True)
-    return data
-
-
-def downsample_flatten(data: DataFrame):
-    print(
-        "Downsample strategy 'flatten' indicated. Will downsample within energy bounds and ensure that all wavelength bins have the same count"
-    )
-    bin_counts = data["Wavelength Bin"].value_counts().sort_index()
-    min_count = bin_counts.min()
-    # flattened_bins = pd.DataFrame(columns=data.columns)
-    samples = []
-    for bin_val in bin_counts.index:
-        bin_df = data[data["Wavelength Bin"] == bin_val]
-        samples.append(bin_df.sample(n=min_count, replace=False))
-
-    return pd.concat(samples, ignore_index=True), min_count
-
-
-def add_wavelength_bin_columns(
-    meta: FitsMetadata, pp: ProcessingParameters, source_data: DataFrame
-):
+def add_wavelength_bin_columns(pp: ProcessingParameters, source_data: DataFrame):
     assert (
         "Wavelength (nm)" in source_data.columns
     ), "Expected column  'Wavelength (nm)' in source data here"
 
-    min_lambda = meta.get_min_wavelength()
-    max_lambda = meta.get_max_wavelength()
-    print(
-        f"Filtering the dataset based on high and low wavelength. From [{min_lambda:.2f}, {max_lambda:.2f}]nm"
-    )
+    min_lambda = pp.min_wavelength
+    max_lambda = pp.max_wavelength
 
-    # Example output: [0.   1.   2.   3.   4.  ] if max_time was ~3.14
+    wave_edges, wave_centers, wave_widths = get_wavelength_bins(pp)
+    print(
+        f"Filtering the dataset based on high and low wavelength (snap to wbin) From [{min_lambda:.2f}, {max_lambda:.2f}]nm"
+    )
 
     # Filter wavelengths
-    valid_range = source_data["Wavelength (nm)"] >= min_lambda
+    valid_range = source_data["Wavelength (nm)"] >= wave_edges[0]
     source_data = source_data[valid_range].reset_index(drop=True)
-    valid_range = source_data["Wavelength (nm)"] <= max_lambda
-
-    # WBIN BINNING
-    lamb_min = source_data["Wavelength (nm)"].min()
-    lamb_max = source_data["Wavelength (nm)"].max()
-
-    if np.isnan(lamb_min):
-        raise Exception("Lamb min is nan")
-
-    if np.isnan(lamb_max):
-        raise Exception("Lamb min is nan")
-
-    wave_edges = np.linspace(
-        lamb_min,
-        lamb_max,
-        pp.wavelength_bins + 1,
-    )
-    print("Bin edges:", wave_edges)
-    wave_centers = 0.5 * (wave_edges[:-1] + wave_edges[1:])
-    wave_widths = np.diff(wave_edges)
+    # Remove the most extreme bin, because it is often half full which disturbs plots
+    valid_range = source_data["Wavelength (nm)"] <= wave_edges[-2]
 
     source_data["Wavelength Bin"] = pd.cut(
         source_data["Wavelength (nm)"],
@@ -231,41 +163,19 @@ def add_wavelength_bin_columns(
         labels=False,
         include_lowest=True,
     )
-
+    # Use pandas nullable integer dtype to preserve NaNs safely
+    source_data["Wavelength Bin"] = source_data["Wavelength Bin"].astype("Int64")
     source_data.sort_values(["Wavelength Bin"], inplace=True)
     source_data["Wavelength Center"] = source_data["Wavelength Bin"].apply(
-        lambda i: wave_centers[i] if pd.notnull(i) else np.nan
+        lambda i: wave_centers[int(i)] if pd.notnull(i) else np.nan
     )
 
     source_data["Wavelength Width"] = source_data["Wavelength Bin"].apply(
-        lambda i: wave_widths[i] if pd.notnull(i) else np.nan
+        lambda i: wave_widths[int(i)] if pd.notnull(i) else np.nan
     )
 
     source_data = source_data[valid_range].reset_index(drop=True)
     return source_data
-
-
-def perform_downsampling(
-    meta: FitsMetadata, pp: ProcessingParameters, source_data: DataFrame
-):
-    # DOWNSAMPLE :
-    if pp.downsample_strategy == "flatten":
-        source_data, min_count = downsample_flatten(source_data)
-        assert all(source_data["Wavelength Bin"].value_counts() == min_count)
-    elif pp.downsample_strategy == "reduce":
-        source_data = source_data.sample(pp.downsample_target_count)
-
-    if pp.padding_strategy == "equalize":
-        source_data = equalize_wavelength_bins(source_data)
-        # Step 1: Count photons in each bin
-
-    return source_data
-
-
-import numpy as np
-import pandas as pd
-from pandas import DataFrame
-from typing import Optional, Tuple
 
 
 def cut_dataset_simple(
@@ -311,7 +221,7 @@ def cut_dataset_with_time_bin_width_and_offset(
     offset_fraction: Optional[float] = None,
     jitter_eps: float = 0.0,
     rng: Optional[np.random.Generator] = None,
-    time_col: str = "relative_time",
+    time_col: str = "time",
     out_col: str = "time_bin",
 ) -> Tuple[DataFrame, np.ndarray, float]:
     """
@@ -415,25 +325,27 @@ def binning_process_distributed(
         # source_data = pd.read_csv(f"temp/{meta.source_filename}")
         # background_data = pd.read_csv(meta.background_filename)
 
-        if pp.take_time_seconds:
-            duration = pp.take_time_seconds
+        if pp.end_time_seconds is not None:
+            assert (
+                pp.start_time_seconds >= 0
+            ), "If you specify end_time_seconds, you need to specify start_time_seconds as well"
+            duration = pp.end_time_seconds - pp.start_time_seconds
         else:
-            duration = meta.t_max
-        # min_time_in_data = source_data["relative_time"].min()
-        max_time_in_data = source_data["relative_time"].max()
-
-        if max_time_in_data < duration:
+            duration = meta.t_max - meta.t_min
+        # min_time_in_data = source_data["time"].min()
+        max_time_in_data = source_data["time"].max()
+        start_time_in_data = source_data["time"].min()
+        if np.abs(max_time_in_data - start_time_in_data - duration) > 10:
             raise Exception(
-                f"Dataset shorter than duration request. Saw time {max_time_in_data} but only {duration} is allowed"
+                f"Dataset shorter than duration request (exceed 10s limit). Saw time {max_time_in_data} but only {duration} is allowed"
             )
 
         # Drop unecessary columns for this analysis
         # source_data.drop()
         if "Wavelength Bin" not in source_data.columns:
             print("Must add binning on wavelength here, this was not set")
-            source_data = add_wavelength_bin_columns(meta, pp, source_data)
+            source_data = add_wavelength_bin_columns(pp, source_data)
 
-        source_data = perform_downsampling(meta, pp, source_data)
         if len(source_data) == 0:
             return source_data, meta
 
@@ -471,12 +383,12 @@ def binning_process(
         # source_data = pd.read_csv(f"temp/{meta.source_filename}")
         # background_data = pd.read_csv(meta.background_filename)
 
-        if pp.take_time_seconds:
-            duration = pp.take_time_seconds
+        if pp.end_time_seconds:
+            duration = pp.end_time_seconds
         else:
             duration = meta.t_max
 
-        max_time_in_data = source_data["relative_time"].max()
+        max_time_in_data = source_data["time"].max()
 
         if max_time_in_data - 1 > duration:
             raise Exception(
@@ -500,7 +412,7 @@ def binning_process(
         if len(source_data) == 0:
             return source_data, meta
         # Suppose we want 1-second time bins:
-        print(source_data.head(200))
+        # print(source_data.head(200))
         bin_edges = make_time_bins(duration, pp.time_bin_seconds)
         if len(bin_edges) <= 1:
             raise Exception("Problem occured, needs more than one bin edge")
@@ -509,7 +421,7 @@ def binning_process(
 
         # First we bin the events based on the number of bin edges
         source_data["Time Bin 0"] = pd.cut(
-            source_data["relative_time"],
+            source_data["time"],
             bins=bin_edges,
             labels=False,
             include_lowest=True,
@@ -542,11 +454,11 @@ def binning_process(
 
         source_data.sort_values(["Wavelength Bin"], inplace=True)
         source_data["Wavelength Center"] = source_data["Wavelength Bin"].apply(
-            lambda i: wave_centers[i] if pd.notnull(i) else np.nan
+            lambda i: wave_centers[int(i)] if pd.notnull(i) else np.nan
         )
 
         source_data["Wavelength Width"] = source_data["Wavelength Bin"].apply(
-            lambda i: wave_widths[i] if pd.notnull(i) else np.nan
+            lambda i: wave_widths[int(i)] if pd.notnull(i) else np.nan
         )
 
         print("Estimate spectrum before ")
@@ -555,15 +467,6 @@ def binning_process(
         )
         meta.apparent_spectrum = generated_spectrum
         save_fits_metadata(meta)
-
-        if pp.downsample_strategy == "flatten":
-            source_data, min_count = downsample_flatten(source_data)
-        elif pp.downsample_strategy == "reduce":
-            source_data = source_data.sample(pp.downsample_target_count)
-
-        if pp.padding_strategy == "equalize":
-            source_data = equalize_wavelength_bins(source_data)
-            # Step 1: Count photons in each bin
 
         print(f"Fitted Spectrum with residual error {r_squared:.3f}")
         print(generated_spectrum.to_string())

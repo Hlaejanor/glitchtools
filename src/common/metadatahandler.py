@@ -234,7 +234,8 @@ def load_processing_param(id) -> ProcessingParameters:
                 time_bin_seconds=data["time_bin_seconds"],
                 anullus_radius_inner=data["anullus_radius_inner"],
                 anullus_radius_outer=data["anullus_radius_outer"],
-                take_time_seconds=data["take_time_seconds"],
+                start_time_seconds=data.get("start_time_seconds", 0),
+                end_time_seconds=data.get("end_time_seconds", None),
                 padding_strategy=data["padding_strategy"],
                 downsample_strategy=data["downsample_strategy"],
                 downsample_target_count=data["downsample_target_count"],
@@ -339,8 +340,11 @@ def load_pipeline(id) -> ComparePipeline:
 
             metadata = ComparePipeline(
                 id=data["id"],
+                source=data["source"],
                 A_fits_id=data["A_fits_id"],
                 B_fits_id=data["B_fits_id"],
+                A_tasks=data["A_tasks"],
+                B_tasks=data["B_tasks"],
                 pp_id=data["pp_id"],
                 gen_id=data["gen_id"],
             )
@@ -350,8 +354,10 @@ def load_pipeline(id) -> ComparePipeline:
         return None
 
 
-def load_gen_param(id) -> GenerationParameters:
+def load_gen_param(id: str | None) -> GenerationParameters:
     path = f"meta_files/generation/{id}.json"
+    if id is None:
+        return None
     is_file = os.path.isfile(path)
     if is_file:
         with open(path, "r") as f:
@@ -368,8 +374,11 @@ def load_gen_param(id) -> GenerationParameters:
             # TODO A hack to deal with some older files, can be removed
             if "raw_event_tile" in data:
                 data["raw_event_file"] = data["raw_event_tile"]
+            assert id == data["id"], "What - the file and internal id has diverged!"
             genmeta = GenerationParameters(
                 id=data["id"],
+                velocity=data.get("velocity", 1.0),
+                empirical=data.get("empirical", False),
                 alpha=data["alpha"],
                 lucretius=data["lucretius"],
                 theta_change_per_sec=data.get("theta_change_per_sec", 0.0),
