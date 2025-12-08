@@ -253,6 +253,51 @@ def downsample_flatten(data: DataFrame, pp: ProcessingParameters):
     return pd.concat(samples, ignore_index=True), min_count
 
 
+def shuffle(
+    source_data: pd.DataFrame,
+    poissonisation_percent: float,
+    meta: FitsMetadata,
+    time_column: str = "time",
+    rng=None,
+):
+    """
+    Generate homogeneous Poisson event times, but preserve spectrum shape and count
+    on [t_min, t_max).
+    If N is given, draw exactly n_fixed times i.i.d.
+    """
+
+    t_min = float(source_data[time_column].min())
+    t_max = float(source_data[time_column].max())
+
+    # Unconditional simulation via exponential gaps
+
+    take = int(source_data.shape[0] * poissonisation_percent)
+
+    if poissonisation_percent == 100:
+        shuffle = source_data
+        leftover = None
+    else:
+        shuffle = source_data.sample(take)
+        leftover = source_data.sample(source_data.shape[0] - take)
+
+    N = shuffle.shape[0]
+    rng = np.random.default_rng() if rng is None else rng
+
+    times = shuffle[time_column].to_numpy()
+    rng.shuffle(times)
+    shuffle[time_column] = times
+
+    if leftover is not None:
+        source_data = pd.concat(shuffle, leftover)
+    else:
+        source_data = shuffle
+
+    source_data.sort_values(time_column, inplace=True)
+    meta.t_min = t_min
+    meta.t_max = t_max
+    return source_data, meta
+
+
 def poissonize_homogeneous(
     source_data: pd.DataFrame,
     poissonisation_percent: float,
@@ -440,6 +485,7 @@ def apply_task(
         "tthinning",
         "downsample",
         "equalize",
+        "shuffle",
         "poissonize",
         "copy",
     ]:
@@ -455,6 +501,7 @@ def apply_task(
         "flatten",
         "reduce",
         "equalize",
+        "shuffle",
         "poissonize",
         "copy",
     ]:
@@ -650,13 +697,17 @@ def apply_task(
         event_meta.source_count = events.shape[0]
         event_meta = fits_save_event_file(events, event_meta)
         return event_meta, events
+    elif task == "shuffle":
+        assert (
+            events is not None
+        ), "Source data must be provided to poissonize. Perhaps you need to generate first?"
     elif task in ["poissonize", "poissonize100", "poissonize80", "poissonize50"]:
         assert (
             events is not None
         ), "Source data must be provided to poissonize. Perhaps you need to generate first?"
         print(f"Homogeneous Poissonization of {event_meta.id} using {task}")
         if task == "poissonize50":
-            poissoniation_percent = 100.0
+            poissoniation_percent = 50.0
         elif task == "poissonize80":
             poissoniation_percent = 80.0
         elif task == "poissonize20":

@@ -97,6 +97,7 @@ defaultpipe = "all"
 
 defaultpipe = "antares_vs_rnd_antares_f347"
 defaultpipe = "all"
+defaultpipe = "rnd_antares_vs_rnd_antares"
 variability_types = np.array(
     [
         "Excess Variability",
@@ -407,11 +408,11 @@ def prediction_1_shifted_peak_test(test_vals, null_vals):
             )
             verdict = "CONTRAINDICATED"
         return {
-            "p1_d_neg_test_peak": neg_test_peak,
-            "p1_d_pos_test_peak": pos_test_peak,
-            "p1_d_neg_null_peak": neg_null_peak,
-            "p1_d_pos_null_peak": pos_null_peak,
-            "p1_d_verdict": verdict,
+            "p1d_neg_test_peak": neg_test_peak,
+            "p1d_pos_test_peak": pos_test_peak,
+            "p1d_neg_null_peak": neg_null_peak,
+            "p1d_pos_null_peak": pos_null_peak,
+            "p1d_verdict": verdict,
         }
     except Exception as e:
         print("Expceiton ", e)
@@ -421,6 +422,7 @@ def check_prediction_1(
     pp: ProcessingParameters,
     test_vals,
     null_vals,
+    q=None,
 ):
     try:
         null_vals = np.asarray(null_vals, dtype=float)
@@ -429,7 +431,7 @@ def check_prediction_1(
         m = test_vals.size
 
         p1a_tail = prediction_1_tail_exceedance_test(
-            test_vals, null_vals, pp.percentile
+            test_vals, null_vals, pp.percentile, q=q
         )
         p1bc_average = prediction_1_average_test(test_vals, null_vals)
         p1d_peak = prediction_1_shifted_peak_test(test_vals, null_vals)
@@ -440,20 +442,33 @@ def check_prediction_1(
         raise e
 
 
+def compute_q(
+    null_vals: DataFrame, variability_type: str, percentile: float = 0.001, N=100
+):
+    null_vals = np.asarray(null_vals, dtype=float)
+    N = 100
+    q_values = np.zeros(N)
+    for i in range(0, N):
+        # 99.9% empirical threshold
+        q = np.quantile(
+            null_vals[variability_type], 1.0 - percentile, method="higher"
+        )  # or 'nearest'/'linear'
+
+        null_vals["time"] = np.random.permutation(null_vals["time"].values)
+        q_values[i] = q
+
+    return q_values.mean(), q_values.std()
+
+
 def prediction_1_tail_exceedance_test(
-    test_vals,
-    null_vals,
-    percentile: float = 0.001,
+    test_vals, null_vals, percentile: float = 0.001, q: float | None = None
 ):
     null_vals = np.asarray(null_vals, dtype=float)
     test_vals = np.asarray(test_vals, dtype=float)
     n = null_vals.size
     m = test_vals.size
-
-    # 99.9% empirical threshold
-    q = np.quantile(
-        null_vals, 1.0 - percentile, method="higher"
-    )  # or 'nearest'/'linear'
+    if q is None:
+        raise ValueError("q must be provided to prediction_1_tail_exceedance_test")
 
     # Exceedances in Antares
     x = int(np.sum(test_vals >= q))
@@ -635,6 +650,16 @@ def compare_two_sets(
             ), f"Expected column {variability_type} in columns for chunked_variability_A"
 
             test_vals = chunked_variability_A[variability_type]
+            # TODO : You need perform 100 samplings to get a good estimate of q.
+            # The best way to do this is to create a separate script to estimate the q threshold, and then save it in file and
+            # use that file in place of the precentile
+            q, q_std = compute_q(
+                chunked_variability_B,
+                variability_type=variability_type,
+                percentile=pp.percentile,
+                N=100,
+            )
+
             null_vals = chunked_variability_B[variability_type]
 
             min_y_A = np.min(test_vals)
@@ -645,15 +670,11 @@ def compare_two_sets(
             print(f"Generating plots for {variability_type} in pipeline {pipe.id} ")
 
             # If both A and B are poissonian, we expect a null results
-            if "poissonize" in pipe.A_tasks or (
-                metaA.synthetic and metaA.gen_id == "isogen"
-            ):
+            if "poissonize" in pipe.A_tasks:
                 A_expected_null = True
             else:
                 A_expected_null = False
-            if "poissonize" in pipe.B_tasks or (
-                metaB.synthetic and metaB.gen_id == "isogen"
-            ):
+            if "poissonize" in pipe.B_tasks:
                 B_expected_null = True
             else:
                 A_expected_null = False
@@ -698,7 +719,7 @@ def compare_two_sets(
                 chunked_variability_A,
                 variability_type,
             )
-            take_obs = perc * chunked_variability_A.shape[0]
+            take_obs = int(perc * chunked_variability_A.shape[0])
             chunked_variability_B_top = take_max_variability(
                 take_obs,
                 chunked_variability_B,
@@ -717,12 +738,15 @@ def compare_two_sets(
                 "variability_type": variability_type,
                 "A": metaA.id,
                 "B": metaB.id,
+                "A_expected_null": A_expected_null,
+                "B_expected_null": B_expected_null,
+                "pp": pp.id,
+                "date_run": datetime.datetime.now(),
             }
             print(f"{pipe.id} Testing prediction 1 ")
+
             results = results | check_prediction_1(
-                pp=pp,
-                test_vals=test_vals,
-                null_vals=null_vals,
+                pp=pp, test_vals=test_vals, null_vals=null_vals, q=q
             )
             print(f"{pipe.id} Testing prediction 12")
             results = results | check_prediction_2(
@@ -735,7 +759,7 @@ def compare_two_sets(
             )
             # Example usage
             ensure_pipeline_folders_exists(pipe)
-            csv_file = f"files/statistical_tests_{pp.get_hash()}.csv"
+            csv_file = "files/statistical_tests.csv"
             write_result_to_csv(results, csv_file)
 
             plot_top_variability_timescales(

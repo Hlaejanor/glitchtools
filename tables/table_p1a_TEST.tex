@@ -1,0 +1,20 @@
+\documentclass[../../Book1.tex]{subfiles}
+    \begin{document}
+\begin{landscape}
+\begin{table}
+\caption{P1a Statistical test results for Antares dataset. Statistically signficant exceedances in Antares dataset compared to control is evidence for flickering (excess temporal variability) in Antares dataset . (Variability Excess Adjacent)}
+\label{table:p1a_TEST.tex}
+\begin{tabular}{lrrrl}
+\toprule
+Pipeline & p (binomial) & Threshold & Exceedances & Verdict \\
+\midrule
+antares\_vs\_rnd\_antares & 1.63e-34 & 1.23e+01 & 245 & SIGNIFICANT \\
+antares\_vs\_rnd\_antares\_f & 1.30e-11 & 1.30e+01 & 174 & SIGNIFICANT \\
+antares\_vs\_rnd\_antares\_t & 9.53e-06 & 3.08e+01 & 146 & SIGNIFICANT \\
+antares\_vs\_rnd\_antares\_lt & 2.87e-01 & 1.51e+02 & 106 & NOT SIGNIFICANT \\
+antares\_vs\_rnd\_antares\_fl & 6.31e-01 & 3.69e+01 & 97 & NOT SIGNIFICANT \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{landscape}
+\end{document}

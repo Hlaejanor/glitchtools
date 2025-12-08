@@ -679,11 +679,11 @@ def take_max_variability(
     variability_observations: DataFrame,
     variability_type: str,
 ) -> DataFrame:
-    print(f"take_max_variability_per_wbin() {take_top_variability_count}")
+    print(f"take_max_variability() {take_top_variability_count}")
     """
     Return up to take_top_variability_count  with the largest 'Excess Variability'.
     """
-
+    take_top_variability_count = int(take_top_variability_count)
     assert variability_type in [
         "Excess Variability",
         "Variability Excess Adjacent",
@@ -1625,7 +1625,7 @@ def plot_wavelength_counts_histogram(
             label=f"Power law B: a={a_B:.2e}, b={b_B:.2f}",
         )
 
-        plt.title(significance, fontsize=10)
+        plt.title(significance, fontsize=10, y=0.95)
         plt.suptitle(title, y=1.05, fontsize=18)
         plt.text(0.5, 0.1, significance, horizontalalignment="center", fontsize=10)
         plt.xlabel(label_x)

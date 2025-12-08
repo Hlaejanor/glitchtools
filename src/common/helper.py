@@ -478,17 +478,53 @@ def read_from_csv(filename) -> DataFrame:
     return data
 
 
-def write_as_latex_table(df: DataFrame, columns_keep, column_labels, filename):
+def write_as_latex_table(
+    df: DataFrame,
+    columns_keep,
+    column_labels,
+    filename,
+    caption="",
+    label=None,
+    standing=False,
+):
+    assert label is not None, "Label must be provided for LaTeX table."
     file_exists = os.path.isfile(filename)
 
-    table_str = df.to_latex(
-        columns=columns_keep,
-        header=column_labels,
+    if file_exists:
+        print(f"Overwriting existing file {filename}")
+
+    # Ensure columns_keep and column_labels have the same length to avoid label mismatch errors
+    if len(columns_keep) != len(column_labels):
+        raise ValueError(
+            f"columns_keep (len={len(columns_keep)}) and column_labels (len={len(column_labels)}) must have the same length."
+        )
+
+    assert len(columns_keep) == len(
+        column_labels
+    ), "columns_keep and column_labels must have the same length."
+    # Rename columns for LaTeX output
+    df_latex = df[columns_keep].copy()
+    df_latex.columns = column_labels
+    table_body = df_latex.to_latex(
         float_format="%.2e",
         escape=True,
+        caption=caption,
+        label=label,
+        index=False,
     )
+    standing = True
+    table_header = """\\documentclass[../../Book1.tex]{subfiles}
+    \\begin{document}"""
+
+    if standing:
+        table_header += "\n\\begin{landscape}\n"
+        table_footer = "\\end{landscape}\n\\end{document}"
+    else:
+        table_footer = "\\end{document}"
+
+    ensure_path_exists(f"./tables")
     with open(filename, mode="w", newline="") as f:
-        f.write(table_str)
+        f.write(f"{table_header}{table_body}{table_footer}")
 
 
 def write_result_to_csv(result: dict, filename):

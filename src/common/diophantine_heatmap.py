@@ -118,5 +118,5 @@ def plot_diophantine_sphere(
 
 # plot_diophantine_sphere(max_wavelength=20, filter_uniques=False, single_wavelenth=True, radius=5)
 plot_diophantine_sphere(
-    max_wavelength=12, filter_uniques=False, single_wavelenth=False, radius=10
+    max_wavelength=70, filter_uniques=False, single_wavelenth=False, radius=2
 )
