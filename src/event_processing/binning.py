@@ -61,19 +61,18 @@ def load_or_compute_chunk_variability_observations(
         )
 
         # print(variability_observations.head(200))
+
         fits_save_cache(cached_filename, variability_observations)
         save_chunk_metadata(chunk_meta)
         # set chunk_variability to the just-computed table so downstream code can use it
-        chunk_variability = variability_observations
-    else:
-        print("Can use cached ChunkVar table!")
-        # Load the chunk metadata, which is now either generated or loaded from disk
-        chunk_meta = load_chunk_metadata(chunkvar_id)
 
-        # Load the variability computed from chunks
-        chunk_variability = fits_read_cache_if_exists(cached_filename)
-        if chunk_variability is None:
-            raise Exception("Cache was supposed to exist!")
+    print("Can use cached ChunkVar table!")
+    # Load the chunk metadata, which is now either generated or loaded from disk
+
+    # Load the variability computed from chunks
+    chunk_variability = fits_read_cache_if_exists(cached_filename)
+    if chunk_variability is None:
+        raise Exception("Cache was supposed to exist!")
 
     # Read the chunked variability observation data from the fits file
 

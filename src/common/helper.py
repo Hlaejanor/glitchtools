@@ -485,6 +485,8 @@ def write_as_latex_table(
     filename,
     caption="",
     label=None,
+    order_by=None,
+    max_count=None,
     standing=False,
 ):
     assert label is not None, "Label must be provided for LaTeX table."
@@ -492,6 +494,17 @@ def write_as_latex_table(
 
     if file_exists:
         print(f"Overwriting existing file {filename}")
+    if max_count is not None and df.shape[0] > max_count:
+        print(
+            f"Need to downsample {filename}, too many obs {df.shape[0]} > {max_count}"
+        )
+        df = df.sample(max_count, replace=False)
+    if order_by is not None:
+        print(df.columns)
+        assert (
+            order_by in df.columns
+        ), f"Cannot sort on column {order_by}, was not in dataset"
+        df.sort_values(by=order_by)
 
     # Ensure columns_keep and column_labels have the same length to avoid label mismatch errors
     if len(columns_keep) != len(column_labels):
@@ -511,15 +524,16 @@ def write_as_latex_table(
         caption=caption,
         label=label,
         index=False,
+        longtable=False,
     )
-    standing = True
     table_header = """\\documentclass[../../Book1.tex]{subfiles}
     \\begin{document}"""
 
     if standing:
-        table_header += "\n\\begin{landscape}\n"
+        table_header += "\n\\begin{landscape}\n\centering \\tiny"
         table_footer = "\\end{landscape}\n\\end{document}"
     else:
+        table_header += "\n\\ \\centering\\ \\tiny"
         table_footer = "\\end{document}"
 
     ensure_path_exists(f"./tables")
@@ -527,25 +541,43 @@ def write_as_latex_table(
         f.write(f"{table_header}{table_body}{table_footer}")
 
 
-def write_result_to_csv(result: dict, filename):
+def write_result_to_csv(result: dict | list, filename):
     """
     Append a result dict to a CSV file.
     Creates the file with headers if it doesn't exist.
     """
+
     # Flatten tuple/list entries (like ci95_p_hat) into two separate columns
-    flat_result = result.copy()
-    if isinstance(flat_result.get("ci95_p_hat"), (tuple, list)):
-        flat_result["ci95_p_hat_low"], flat_result["ci95_p_hat_high"] = flat_result.pop(
-            "ci95_p_hat"
-        )
 
     file_exists = os.path.isfile(filename)
 
     with open(filename, mode="a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=flat_result.keys())
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(flat_result)
+        if isinstance(result, list) and len(result) > 0:
+            writer = csv.DictWriter(f, fieldnames=result[0].keys())
+            if not file_exists:
+                writer.writeheader()
+            for res in result:
+                flat_result = res.copy()
+                if isinstance(flat_result.get("ci95_p_hat"), (tuple, list)):
+                    (
+                        flat_result["ci95_p_hat_low"],
+                        flat_result["ci95_p_hat_high"],
+                    ) = flat_result.pop("ci95_p_hat")
+                writer.writerow(flat_result)
+            return
+        elif isinstance(result, dict):
+            writer = csv.DictWriter(f, fieldnames=result.keys())
+            if not file_exists:
+                writer.writeheader()
+            flat_result = result.copy()
+            if isinstance(flat_result.get("ci95_p_hat"), (tuple, list)):
+                (
+                    flat_result["ci95_p_hat_low"],
+                    flat_result["ci95_p_hat_high"],
+                ) = flat_result.pop("ci95_p_hat")
+            writer.writerow(flat_result)
+        else:
+            raise ValueError("Result must be a dict or a non-empty list of dicts.")
 
 
 def split_into_time_bins(dataset, bins=100, seed=None):

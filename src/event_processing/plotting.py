@@ -585,14 +585,14 @@ def get_chunk_variability(wbin, tbins_counts, wbin_shot_noise):
 
 
 def take_top_wavelengths_per_timescale(
-    take_top_variability_count: int,
+    variability_percentile: int,
     variability_observations: pd.DataFrame,
     variability_type: str,
     *,
     time_bin_col: str = "Time Bin Width",
     wavelength_bin_col: str = "Wavelength Bin",
 ) -> pd.DataFrame:
-    print(f"take_top_wavelengths_per_timescale() N ={take_top_variability_count}")
+    print(f"take_top_wavelengths_per_timescale() N ={variability_percentile}")
     """
     For each time-scale bin (e.g., 'Time Bin Width'), select the top-K  wavelength bins
     ranked by the chosen variability metric.
@@ -658,7 +658,7 @@ def take_top_wavelengths_per_timescale(
     )
 
     selected = best_per_wavelength[
-        best_per_wavelength["_RankWithinTimeBin"] <= take_top_variability_count
+        best_per_wavelength["_RankWithinTimeBin"] <= variability_percentile
     ].copy()
 
     selected["_TimeBinValue"] = selected[time_bin_col]
@@ -675,15 +675,15 @@ def take_top_wavelengths_per_timescale(
 
 
 def take_max_variability(
-    take_top_variability_count: int,
+    variability_percentile: int,
     variability_observations: DataFrame,
     variability_type: str,
 ) -> DataFrame:
-    print(f"take_max_variability() {take_top_variability_count}")
+    print(f"take_max_variability() {variability_percentile}")
     """
-    Return up to take_top_variability_count  with the largest 'Excess Variability'.
+    Return up to variability_percentile  with the largest 'Excess Variability'.
     """
-    take_top_variability_count = int(take_top_variability_count)
+    variability_percentile = int(variability_percentile)
     assert variability_type in [
         "Excess Variability",
         "Variability Excess Adjacent",
@@ -701,19 +701,19 @@ def take_max_variability(
 
     top = variability_observations.sort_values(
         by=variability_type, ascending=False
-    ).head(take_top_variability_count)
+    ).head(variability_percentile)
 
     return top
 
 
 def take_max_variability_per_wbin(
-    take_top_variability_count: int,
+    variability_percentile: int,
     variability_observations: DataFrame,
     variability_type: str,
 ) -> DataFrame:
-    print(f"take_max_variability_per_wbin() {take_top_variability_count}")
+    print(f"take_max_variability_per_wbin() {variability_percentile}")
     """
-    Return up to take_top_variability_count rows per (Time Bin Width index, Wavelength Bin)
+    Return up to variability_percentile rows per (Time Bin Width index, Wavelength Bin)
     with the largest 'Excess Variability'.
 
     This implementation:
@@ -756,7 +756,7 @@ def take_max_variability_per_wbin(
         downsampled = group.sample(n=min_chunks_per_wbin, random_state=42)
         # sort by the numeric excess variability (NaNs go to the end) and take top N
         top = downsampled.sort_values(by="_Excess_metric", ascending=False).head(
-            take_top_variability_count
+            variability_percentile
         )
         # print(top.head(10))
         parts.append(top)
@@ -1465,7 +1465,8 @@ def plot_top_variability_timescales(
     x = variability["Wavelength Center"].to_numpy()
     y = variability["Time Bin Width"].to_numpy()
     c = variability[variability_type].to_numpy()
-
+    minc = np.min(c)
+    maxc = np.max(c)
     title = f"{handle} : timescale sampling"
 
     plt.figure(figsize=(9, 6))
@@ -1481,9 +1482,10 @@ def plot_top_variability_timescales(
             mincnt=mincnt,
             xscale="linear",
             yscale="linear",
+            vmin=minc,
+            vmax=maxc,
             C=None,
             reduce_C_function=None,
-            norm=LogNorm(),  # log color scale for counts
         )
         cbar = plt.colorbar(hb)
         cbar.set_label("Count per bin (log)")
@@ -1543,6 +1545,7 @@ def plot_wavelength_counts_histogram(
     A_handle: str = "A",
     B_handle: str = "B",
     perc: float = None,
+    saveplot: bool = False,
 ):
     try:
         filename = filename.replace(" ", "_")
@@ -1551,6 +1554,13 @@ def plot_wavelength_counts_histogram(
         assert column in event_data_A.columns, f"Missing column {column} in A"
         assert column in event_data_B.columns, f"Missing column {column} in B"
         assert "Wavelength Center" in event_data_B.columns, "Missing Wavelength Center"
+
+        print(
+            f"Event data A and B needs to have similar counts. A:{event_data_A.shape[0]}, B:{event_data_B.shape[0]}"
+        )
+        assert (
+            abs(1 - event_data_A.shape[0] / event_data_B.shape[0]) < 0.01
+        ), "Event data A and B needs to have similar counts, now too different "
 
         label_x = "Wavelength center"
         label_y = "Counts"
@@ -1568,62 +1578,81 @@ def plot_wavelength_counts_histogram(
         counts_A = counts[0]
         counts_B = counts[1]
 
+        # Declare these so they exist even when curve fitting fails
+        a_A = None
+        b_A = None
+        a_B = None
+        b_B = None
+        e_a_ = None
+        se_b_A = None
+        se_a_B = None
+        se_b_B = None
+        p = None
+        significance = None
         # Use bin centers for fitting
         bin_centers_A = 0.5 * (bins[1:] + bins[:-1])
         bin_centers_B = 0.5 * (bins[1:] + bins[:-1])
         print("-- Curve fitting")
         # Fit a power law to histogram A
-        popt_A, pcov_A = curve_fit(
-            simple_power_law,
-            bin_centers_A[counts_A > 0],  # avoid log(0)
-            counts_A[counts_A > 0],
-            p0=[1e3, -2],
-        )
-        print("-- Curve fitting done")
-        a_A, b_A = popt_A
-        var_a_A, var_b_A = np.diag(pcov_A)  # extract variances
-        se_a_A, se_b_A = np.sqrt(var_a_A), np.sqrt(var_b_A)
+        try:
+            popt_A, pcov_A = curve_fit(
+                simple_power_law,
+                bin_centers_A[counts_A > 0],  # avoid log(0)
+                counts_A[counts_A > 0],
+                p0=[1e3, -2],
+            )
+            print("-- Curve fitting done")
+            a_A, b_A = popt_A
+            var_a_A, var_b_A = np.diag(pcov_A)  # extract variances
+            se_a_A, se_b_A = np.sqrt(var_a_A), np.sqrt(var_b_A)
 
-        y_fit_A = simple_power_law(bin_centers_A, a_A, b_A)
+            y_fit_A = simple_power_law(bin_centers_A, a_A, b_A)
 
-        # Plot the fitted curve
-        plt.plot(
-            bin_centers_A,
-            y_fit_A,
-            linestyle="--",
-            color="red",
-            label=f"Power law A: a={a_A:.2e}, b={b_A:.2f}",
-        )
+            # Plot the fitted curve
+            plt.plot(
+                bin_centers_A,
+                y_fit_A,
+                linestyle="--",
+                color="red",
+                label=f"Power law A: a={a_A:.2e}, b={b_A:.2f}",
+            )
 
-        popt_B, pcov_B = curve_fit(
-            simple_power_law,
-            bin_centers_B[counts_B > 0],  # avoid log(0)
-            counts_B[counts_B > 0],
-            p0=[1e3, -2],
-        )
-        a_B, b_B = popt_B
-        var_a_B, var_b_B = np.diag(pcov_B)  # extract variances
-        se_a_B, se_b_B = np.sqrt(var_a_A), np.sqrt(var_b_A)
+        except Exception as e:
+            print(f"Exception when fitting curve, recovering.", e)
 
-        y_fit_B = simple_power_law(bin_centers_B, a_B, b_B)
+        try:
+            popt_B, pcov_B = curve_fit(
+                simple_power_law,
+                bin_centers_B[counts_B > 0],  # avoid log(0)
+                counts_B[counts_B > 0],
+                p0=[1e3, -2],
+            )
 
-        # The difference in curves
-        delta_b = b_A - b_B
+            a_B, b_B = popt_B
+            var_a_B, var_b_B = np.diag(pcov_B)  # extract variances
+            se_a_B, se_b_B = np.sqrt(var_a_A), np.sqrt(var_b_A)
 
-        # The standard error for the delta is the square root of the summed squares
-        se_delta = np.sqrt(se_b_A**2 + se_b_B**2)
-        z = delta_b / se_delta
-        p = 2 * (1 - norm.cdf(abs(z)))  # two-sided test
-        significance = f"Top {perc}% obs. Δb = {delta_b:.3f}, p = {p:.3g}"
+            y_fit_B = simple_power_law(bin_centers_B, a_B, b_B)
 
-        # Plot the fitted curve
-        plt.plot(
-            bin_centers_A,
-            y_fit_B,
-            linestyle="--",
-            color="blue",
-            label=f"Power law B: a={a_B:.2e}, b={b_B:.2f}",
-        )
+            # The difference in curves
+            delta_b = b_A - b_B
+
+            # The standard error for the delta is the square root of the summed squares
+            se_delta = np.sqrt(se_b_A**2 + se_b_B**2)
+            z = delta_b / se_delta
+            p = 2 * (1 - norm.cdf(abs(z)))  # two-sided test
+            significance = f"Top {perc}% obs. Δb = {delta_b:.3f}, p = {p:.3g}"
+
+            # Plot the fitted curve
+            plt.plot(
+                bin_centers_A,
+                y_fit_B,
+                linestyle="--",
+                color="blue",
+                label=f"Power law B: a={a_B:.2e}, b={b_B:.2f}",
+            )
+        except Exception as e:
+            print(f"Problem fitting curve, aborting due to {repr(e)}")
 
         plt.title(significance, fontsize=10, y=0.95)
         plt.suptitle(title, y=1.05, fontsize=18)
@@ -1634,8 +1663,8 @@ def plot_wavelength_counts_histogram(
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"./plots/{filename}", dpi=300)
-
+        if saveplot:
+            plt.savefig(f"./plots/{filename}", dpi=300)
         if show:
             plt.show()
         plt.close()
@@ -1643,8 +1672,18 @@ def plot_wavelength_counts_histogram(
         return a_A, b_A, a_B, b_B, se_a_A, se_b_A, se_a_B, se_b_B, p
 
     except Exception as e:
-        print(f"Plotting failed: {e}")
-        raise e
+        print(f"Plotting failed: {repr(e)}")
+        return (
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
 
 
 def plot_chunk_variability_shape(
@@ -1716,12 +1755,13 @@ def plot_chunk_variability_excess(
     filename = filename.replace(" ", "_")
     print(f"plot_chunk_variability_excess:  {filename}")
     if variability_type is None:
-        variability_type = pp.variability_typ
+        variability_type = pp.variability_type
     assert (
         variability_type in variability.columns
     ), f"Variability type '{variability_type}' not found in variability DataFrame columns"
 
     wavelengths = variability["Wavelength Center"]
+
     y_raw = variability[variability_type]
 
     label_y = f"{variability_type}"

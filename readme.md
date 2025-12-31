@@ -14,7 +14,7 @@ This project serves three goals:
    To create mimic datasets that contain the flux variability of the Lightlane variety. These are used as controls in the analysis pipeline
 
 3. **Visualization**  
-   To visualize a telescope moving across a "Lanesheet" — a conceptual grid of lightlanes — to aid in understanding the model’s dynamics.
+   To visualize a telescope moving across a "Lanesheet" - a conceptual grid of lightlanes - to aid in understanding the model’s dynamics.
 
 
 ### Installation instructions

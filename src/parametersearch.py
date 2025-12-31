@@ -152,7 +152,7 @@ def refine_search(
         ):
             print("This parameter combination has already been tested.")
         else:
-            print("This is a new parameter combination — go ahead!")
+            print("This is a new parameter combination - go ahead!")
 
         # Find the best match
 
@@ -254,7 +254,7 @@ def get_variant_gen_params(
             ):
                 print("This parameter combination has already been tested.")
             else:
-                print("This is a new parameter combination — go ahead!")
+                print("This is a new parameter combination - go ahead!")
                 genmetas.append(genmeta)
                 i += 1
                 if i >= N:
@@ -407,13 +407,13 @@ def sample_params():
         lucretius : the slope of the grid_distance growth curve
     """
 
-    # Emitter radius — typical range from ~1 to 4
+    # Emitter radius - typical range from ~1 to 4
     r_e = np.random.uniform(1.0, 4.0)
 
-    # Theta — any angle on unit circle
+    # Theta - any angle on unit circle
     theta = np.random.uniform(0, 2 * np.pi)
 
-    # Velocity — slow to moderate tracing
+    # Velocity - slow to moderate tracing
     alpha = np.random.uniform(0.1, 5.0)
 
     lucretius = np.random.uniform(-1, -2)

@@ -1,5 +1,6 @@
 import sys
 import os
+import pandas as pd
 import numpy as np
 from scipy.stats import binomtest
 from scipy.stats import norm
@@ -76,27 +77,13 @@ from event_processing.binning import (
 
 
 version = 1.0
+"""
+TLD;DR This script runs the variability analysis, and is responsible for calling the plotting functions
 
+The variability analysis
 
-defaultpipe = "anisogen2_vs_rnd_anisogen2"
+"""
 
-
-defaultpipe = "anisogen_vs_rnd_anisogen"
-defaultpipe = "anisogen2_vs_rnd_anisogen2"
-
-defaultpipe = "rnd_antares_vs_rnd_antares"
-defaultpipe = "antares_vs_rnd_antares_longer"
-defaultpipe = "anisogen_vs_rnd_anisogen"
-
-defaultpipe = "antares_vs_rnd_antares_full_thin"
-
-defaultpipe = "anisogen"
-
-defaultpipe = "anisogen_3"
-defaultpipe = "all"
-
-defaultpipe = "antares_vs_rnd_antares_f347"
-defaultpipe = "all"
 defaultpipe = "rnd_antares_vs_rnd_antares"
 variability_types = np.array(
     [
@@ -292,8 +279,9 @@ def prediction_1_skewed_mass(test_vals, null_vals):
         ), "Null set : The positive probability mass must exceed 0 for this test to make sense"
         null_ratio = neg_mass_null / pos_mass_null
         test_ratio = neg_mass_test / pos_mass_test
-
-        if test_ratio < null_ratio * 0.5:
+        if test_ratio is None:
+            print(f"   ERROR : Could not compare probability mass%% ")
+        elif test_ratio < null_ratio * 0.5:
             print(
                 f"   STRONGLY CONFIRMED : The probability mass ratio is skewed positive by more than 50%% "
             )
@@ -317,7 +305,11 @@ def prediction_1_skewed_mass(test_vals, null_vals):
             "p1e_verdict": verdict,
         }
     except Exception:
-        return {"mass_ratio_test": None, "mass_ratio_null": None, "skewed": "ERROR"}
+        return {
+            "p1e_mass_ratio_test": None,
+            "p1e_mass_ratio_null": None,
+            "p1e_verdict": "ERROR",
+        }
 
 
 def prediction_1_shifted_peak_test(test_vals, null_vals):
@@ -416,22 +408,29 @@ def prediction_1_shifted_peak_test(test_vals, null_vals):
         }
     except Exception as e:
         print("Expceiton ", e)
+        return {
+            "p1d_neg_test_peak": None,
+            "p1d_pos_test_peak": None,
+            "p1d_neg_null_peak": None,
+            "p1d_pos_null_peak": None,
+            "p1d_verdict": "ERROR",
+        }
 
 
 def check_prediction_1(
     pp: ProcessingParameters,
     test_vals,
     null_vals,
-    q=None,
+    empirical_q=None,
 ):
     try:
         null_vals = np.asarray(null_vals, dtype=float)
         test_vals = np.asarray(test_vals, dtype=float)
         n = null_vals.size
         m = test_vals.size
-
+        # Merge in the columns from the tail exceedance test
         p1a_tail = prediction_1_tail_exceedance_test(
-            test_vals, null_vals, pp.percentile, q=q
+            test_vals, null_vals, pp.percentile, empirical_q=empirical_q
         )
         p1bc_average = prediction_1_average_test(test_vals, null_vals)
         p1d_peak = prediction_1_shifted_peak_test(test_vals, null_vals)
@@ -443,35 +442,27 @@ def check_prediction_1(
 
 
 def compute_q(
-    null_vals: DataFrame, variability_type: str, percentile: float = 0.001, N=100
+    variability_obs: DataFrame, variability_type: str, percentile: float = 0.001, N=100
 ):
-    null_vals = np.asarray(null_vals, dtype=float)
-    N = 100
-    q_values = np.zeros(N)
-    for i in range(0, N):
-        # 99.9% empirical threshold
-        q = np.quantile(
-            null_vals[variability_type], 1.0 - percentile, method="higher"
-        )  # or 'nearest'/'linear'
+    q = np.quantile(
+        variability_obs[variability_type], 1.0 - percentile, method="higher"
+    )  # or 'nearest'/'linear'
 
-        null_vals["time"] = np.random.permutation(null_vals["time"].values)
-        q_values[i] = q
-
-    return q_values.mean(), q_values.std()
+    return q
 
 
 def prediction_1_tail_exceedance_test(
-    test_vals, null_vals, percentile: float = 0.001, q: float | None = None
+    test_vals, null_vals, percentile: float = 0.001, empirical_q: float | None = None
 ):
     null_vals = np.asarray(null_vals, dtype=float)
     test_vals = np.asarray(test_vals, dtype=float)
     n = null_vals.size
     m = test_vals.size
-    if q is None:
+    if empirical_q is None:
         raise ValueError("q must be provided to prediction_1_tail_exceedance_test")
 
-    # Exceedances in Antares
-    x = int(np.sum(test_vals >= q))
+    # Exceedances in the A dataset compared to the specified empirical Q
+    x = int(np.sum(test_vals >= empirical_q))
     p_hat = x / m
 
     # Exact binomial one-sided test (H1: p > p0)
@@ -481,7 +472,7 @@ def prediction_1_tail_exceedance_test(
     ci_low, ci_high = test.proportion_ci(confidence_level=0.95, method="exact")
 
     return {
-        "p1a_threshold_q": float(q),
+        "p1a_threshold_q": float(empirical_q),
         "p1a_null_n": int(n),
         "p1a_test_m": int(m),
         "p1a_exceedances_x": x,
@@ -503,6 +494,7 @@ def check_prediction_2(
     variability_type: str,
     pipe: ComparePipeline,
     perc: float = None,
+    saveplot: bool = False,
 ):
     results = {}
     (
@@ -525,11 +517,14 @@ def check_prediction_2(
         B_handle=pipe.B_fits_id,
         title="High variability concentration",
         perc=perc,
+        saveplot=saveplot,
     )
     results["p2_slope_A"] = b_A
     results["p2_slope_B"] = b_B
-
-    if p2_p < 0.05:
+    if p2_p is None:
+        print("  ERROR : The slope difference were not computed ")
+        p2a_significance_verdict = "ERROR"
+    elif p2_p < 0.05:
         print(
             "  CONFIRMED : The slope difference in the curves is statistically significant "
         )
@@ -539,9 +534,11 @@ def check_prediction_2(
 
     results["p2a_slope_p"] = p2_p
     results["p2a_verdict"] = p2a_significance_verdict
-
-    if b_A < 0:
-        print(" CONFIRMED : The slope of the curve is negative {b_A}")
+    if b_A is None:
+        print("  ERROR : The slope of the curve had an ERROR ")
+        p2b_verdict = "ERROR"
+    elif b_A < 0:
+        print(f" CONFIRMED : The slope of the curve is negative {b_A}")
         p2b_verdict = "CONFIRMED"
     else:
         print(f" CONTRAINDICATED: The slope of the curve was positive {b_A}")
@@ -582,16 +579,260 @@ def compute_chunk_var(
         return [f"Saved chunk file {cached_filename}"]
 
 
+def get_empirical_q_from_results_file(pipeline_id: str, variability_type: str):
+    """
+    Docstring for get_empirical_q_from_results_file
+    Read CSV file and determine the average value in the q_threshold_this_run columns that satisfies filtering criteria
+    :param pipeline_id: Description
+    :type pipeline_id: str
+    :param variability_type: Description
+    :type variability_type: str
+    """
+    filename = f"files/baseliner.csv"
+    try:
+        # Read csv file
+        df = pd.read_csv(filename)
+
+        idxs = (df["variability_type"] == variability_type) & (
+            df["pipeline_id"] == pipeline_id
+        )
+
+        q_observations = pd.to_numeric(
+            df.loc[idxs, "q_threshold_this_run"], errors="coerce"
+        ).mean()
+
+        print(
+            f"Read empirical q {q_observations.mean()} from baseline file {filename} for variability type {variability_type}"
+        )
+        return q_observations.mean()
+    except Exception as e:
+        print(f"Error reading baseline file {filename}: {e}")
+        return 0.0
+
+
+def prediction_1(
+    pipe: ComparePipeline,
+    metaA: FitsMetadata,
+    metaB: FitsMetadata,
+    pp: ProcessingParameters,
+    variability_type: str,
+    chunked_variability_A: DataFrame,
+    chunked_variability_B: DataFrame,
+    plot=False,
+):
+    # Prepare data for PREDICITON 1
+
+    # PREDICTION 1 tests if the number of tail exceedances in the current A dataset, exceeds a specified q-thresholds
+    # This q-threshold can vary a great deal between runs, because of the the randomized bin width, and other random effects.
+    # So each trial needs to be checked against
+    # the average q value, orhterwise the confidence will fluctutate a lot (at least 1000x) per run, making the
+    # confidence difficult to pin down.
+
+    # First compute the q-threshold for the knockout dataset for this run
+    #  This marks the 0.999 percentile cutoff on the knockout dataset for this particular randomization.
+
+    q_threshold_this_run = compute_q(
+        chunked_variability_B,
+        variability_type=variability_type,
+        percentile=pp.percentile,
+    )
+
+    # Then load all the computed q threshold from a reference set called baseliner.csv,
+    # and use that empirical q to compute the confidence of this particular trial.
+
+    empirical_q = get_empirical_q_from_results_file(pipe.id, variability_type)
+
+    # Extract the variability metrics of the current type
+    test_vals = chunked_variability_A[variability_type]
+
+    # Extract the variability metrics for this variability type
+    null_vals = chunked_variability_B[variability_type]
+
+    # If both A and B are poissonian, we expect a null results
+    # Special case if the pipe.id is named isogen_vs_rnd_isogen, this is a generated dataset with enough Lane density to assume that it is isotropic
+    if "poissonize" in pipe.A_tasks or pipe.id == "isogen_vs_rnd_isogen":
+        A_expected_null = True
+    else:
+        A_expected_null = False
+
+    if "poissonize" in pipe.B_tasks:
+        B_expected_null = True
+    else:
+        B_expected_null = False
+
+    # Prepare the output dictionary
+    result = {
+        "A_expected_null": A_expected_null,
+        "B_expected_null": B_expected_null,
+        "q_threshold_this_run": q_threshold_this_run,
+        "empirical_q": empirical_q,
+    }
+
+    print(f"{pipe.id} Testing prediction 1 ")
+    # Merge in the columns returned from the actual prediction
+    result = result | check_prediction_1(
+        pp=pp, test_vals=test_vals, null_vals=null_vals, empirical_q=empirical_q
+    )
+
+    if plot:
+        print(
+            f"Generating PREDICTION 1 plots for {variability_type} in pipeline {pipe.id} "
+        )
+        # Plot the histogram shape of the variability of these two datasets
+        # This is used to separate isotropic, temporal variability from
+
+        min_y_A = np.min(test_vals)
+        max_y_A = np.max(test_vals)
+        min_y_B = np.min(null_vals)
+        max_y_B = np.max(null_vals)
+
+        plot_chunk_variability_shape(
+            variabilityA=chunked_variability_A,
+            variabilityB=chunked_variability_B,
+            pp=pp,
+            variability_type=variability_type,
+            filename=f"{pipe.id}/hist_{variability_type}.png",
+            show=False,
+            handleA=metaA.star,
+            handleB=metaB.star,
+        )
+
+        plot_chunk_variability_excess(
+            variability=chunked_variability_A,
+            pp=pp,
+            variability_type=variability_type,
+            filename=f"{pipe.id}/A_{variability_type}.png",
+            show=False,
+            handle="A",
+            ylim=(np.min([min_y_A, min_y_B]), np.max([max_y_A, max_y_B])),
+        )
+
+        plot_chunk_variability_excess(
+            variability=chunked_variability_B,
+            pp=pp,
+            filename=f"{pipe.id}/B_{variability_type}.png",
+            variability_type=variability_type,
+            show=False,
+            handle="B",
+            ylim=(np.min([min_y_A, min_y_B]), np.max([max_y_A, max_y_B])),
+        )
+
+    return result
+
+
+def perc_diff(a: DataFrame, b: DataFrame, not_more_than: float):
+    perc_diff = abs(1 - (a.shape[0] / b.shape[0]))
+    return perc_diff > not_more_than, perc_diff
+
+
+def prediction_2(
+    pipe: ComparePipeline,
+    metaA: FitsMetadata,
+    metaB: FitsMetadata,
+    pp: ProcessingParameters,
+    variability_type: str,
+    chunked_variability_A: DataFrame,
+    chunked_variability_B: DataFrame,
+    plot: bool = False,
+):
+    # PREDICITON 2
+    # Prepare data for prediction 2, varibility / hardening
+    # Prediction to is easier to see when focusing on the shape of high-variability tail
+    # Take the top highest variability metrics, and compare the shape.
+    max_length_diff = 0.01
+
+    halt, diff = perc_diff(
+        chunked_variability_A, chunked_variability_B, max_length_diff
+    )
+    assert (
+        not halt
+    ), f"The shape of dataset A {chunked_variability_A.shape[0]} and B {chunked_variability_A.shape[0]} was {diff:2f}, exceeding safeguard of {max_length_diff:2f}"
+
+    # Ensure that we are using a value
+    if pp.variability_percentile is None:
+        print("WARNING : Variability precentile not specified, default to top 10%")
+        pp.variability_percentile = 0.01
+
+    # Check if the size of the chunked variability datasets are the same. They should be!
+    percdiff = abs(1 - chunked_variability_A.shape[0] / chunked_variability_B.shape[0])
+    assert (
+        percdiff < 0.001
+    ), f"The size of chunked variability datasets differs by {percdiff}%. A{chunked_variability_A.shape[0]} vs B: {chunked_variability_B.shape[0]}. This has downstream effects, and should be exactly the same!"
+
+    # Take the top variability from A dataset
+    take_obs_A = int(pp.variability_percentile * chunked_variability_A.shape[0])
+    take_obs_B = int(pp.variability_percentile * chunked_variability_B.shape[0])
+    percdiff = abs(1 - take_obs_A / take_obs_B)
+    assert (
+        percdiff < 0.01
+    ), f"The top observation counts in datasets vary by more than 1 percent! Diff {percdiff} %"
+
+    chunked_variability_A_top = take_max_variability(
+        take_obs_A,
+        chunked_variability_A,
+        variability_type,
+    )
+
+    chunked_variability_B_top = take_max_variability(
+        take_obs_B,
+        chunked_variability_B,
+        variability_type,
+    )
+
+    # Find the clamp
+
+    print(f"{pipe.id} Testing prediction 12")
+    result = check_prediction_2(
+        pp=pp,
+        chunked_variability_A_top=chunked_variability_A_top,
+        chunked_variability_B_top=chunked_variability_B_top,
+        variability_type=variability_type,
+        pipe=pipe,
+        perc=pp.variability_percentile,
+        saveplot=plot,
+    )
+
+    if plot:
+        min_y_A = np.min(chunked_variability_A_top)
+        max_y_A = np.max(chunked_variability_A_top)
+        min_y_B = np.min(chunked_variability_B_top)
+        max_y_B = np.max(chunked_variability_B_top)
+
+        plot_top_variability_timescales(
+            variability=chunked_variability_A_top,
+            pp=pp,
+            variability_type=variability_type,
+            filename=f"{pipe.id}/time_scales_{variability_type}_A.png",
+            show=False,
+            fit_curve=False,
+            handle="A",
+        )
+
+        plot_top_variability_timescales(
+            variability=chunked_variability_B_top,
+            pp=pp,
+            variability_type=variability_type,
+            filename=f"{pipe.id}/time_scales_{variability_type}_B.png",
+            show=False,
+            fit_curve=False,
+            handle="B",
+        )
+
+    return result
+
+
 def compare_two_sets(
     pipe: ComparePipeline,
     metaA: FitsMetadata,
     metaB: FitsMetadata,
     pp: ProcessingParameters,
+    plot=False,
 ):
     ensure_pipeline_folders_exists(pipe)
     print(
         f"Comparing two datasets : {metaA.id}: {metaA.star} vs {metaB.id} {metaB.star}"
     )
+
     log = []
 
     (
@@ -638,7 +879,7 @@ def compare_two_sets(
     assert (
         pp.variability_type in chunked_variability_B.columns
     ), f"Expected column {pp.variability_type} in columns for chunked_variability_B"
-
+    results = []
     for variability_type in variability_types:
         try:
             assert (
@@ -649,143 +890,54 @@ def compare_two_sets(
                 variability_type in chunked_variability_A.columns
             ), f"Expected column {variability_type} in columns for chunked_variability_A"
 
+            # Extract the variability metrics
             test_vals = chunked_variability_A[variability_type]
-            # TODO : You need perform 100 samplings to get a good estimate of q.
-            # The best way to do this is to create a separate script to estimate the q threshold, and then save it in file and
-            # use that file in place of the precentile
-            q, q_std = compute_q(
-                chunked_variability_B,
-                variability_type=variability_type,
-                percentile=pp.percentile,
-                N=100,
-            )
-
             null_vals = chunked_variability_B[variability_type]
 
-            min_y_A = np.min(test_vals)
-            max_y_A = np.max(test_vals)
-            min_y_B = np.min(null_vals)
-            max_y_B = np.max(null_vals)
-
-            print(f"Generating plots for {variability_type} in pipeline {pipe.id} ")
-
-            # If both A and B are poissonian, we expect a null results
-            if "poissonize" in pipe.A_tasks:
-                A_expected_null = True
-            else:
-                A_expected_null = False
-            if "poissonize" in pipe.B_tasks:
-                B_expected_null = True
-            else:
-                A_expected_null = False
-
-            plot_chunk_variability_shape(
-                variabilityA=chunked_variability_A,
-                variabilityB=chunked_variability_B,
-                pp=pp,
-                variability_type=variability_type,
-                filename=f"{pipe.id}/hist_{variability_type}.png",
-                show=False,
-                handleA=metaA.star,
-                handleB=metaB.star,
-            )
-            if False:
-                plot_chunk_variability_excess(
-                    variability=chunked_variability_A,
-                    pp=pp,
-                    variability_type=variability_type,
-                    filename=f"{pipe.id}/A_{variability_type}.png",
-                    show=False,
-                    handle="A",
-                    ylim=(np.min([min_y_A, min_y_B]), np.max([max_y_A, max_y_B])),
-                )
-
-                plot_chunk_variability_excess(
-                    variability=chunked_variability_B,
-                    pp=pp,
-                    filename=f"{pipe.id}/B_{variability_type}.png",
-                    variability_type=variability_type,
-                    show=False,
-                    handle="B",
-                    ylim=(np.min([min_y_A, min_y_B]), np.max([max_y_A, max_y_B])),
-                )
-
-            pp.take_top_variability_count = 10
-            perc = 0.01
-            take_obs = perc * chunked_variability_A.shape[0]
-
-            chunked_variability_A_top = take_max_variability(
-                take_obs,
-                chunked_variability_A,
-                variability_type,
-            )
-            take_obs = int(perc * chunked_variability_A.shape[0])
-            chunked_variability_B_top = take_max_variability(
-                take_obs,
-                chunked_variability_B,
-                variability_type,
-            )
-
-            min_y_A = np.min(chunked_variability_A_top)
-            max_y_A = np.max(chunked_variability_A_top)
-            min_y_B = np.min(chunked_variability_B_top)
-            max_y_B = np.max(chunked_variability_B_top)
-
-            results = {
+            result = {
                 "date": datetime.datetime.now(),
                 "pp_hash": pp.get_hash(),
                 "pipeline_id": pipe.id,
                 "variability_type": variability_type,
                 "A": metaA.id,
                 "B": metaB.id,
-                "A_expected_null": A_expected_null,
-                "B_expected_null": B_expected_null,
                 "pp": pp.id,
                 "date_run": datetime.datetime.now(),
             }
-            print(f"{pipe.id} Testing prediction 1 ")
 
-            results = results | check_prediction_1(
-                pp=pp, test_vals=test_vals, null_vals=null_vals, q=q
+            # Merge the data from prediction_1 into the dataset
+            result = result | prediction_1(
+                pipe,
+                metaA,
+                metaB,
+                pp,
+                variability_type,
+                chunked_variability_A,
+                chunked_variability_B,
+                plot=False,
             )
-            print(f"{pipe.id} Testing prediction 12")
-            results = results | check_prediction_2(
-                pp=pp,
-                chunked_variability_A_top=chunked_variability_A_top,
-                chunked_variability_B_top=chunked_variability_B_top,
-                variability_type=variability_type,
-                pipe=pipe,
-                perc=perc,
+            result = result | prediction_2(
+                pipe,
+                metaA,
+                metaB,
+                pp,
+                variability_type,
+                chunked_variability_A,
+                chunked_variability_B,
+                plot=True,
             )
-            # Example usage
+
+            # Write result of these tests to statistical tests
             ensure_pipeline_folders_exists(pipe)
             csv_file = "files/statistical_tests.csv"
-            write_result_to_csv(results, csv_file)
-
-            plot_top_variability_timescales(
-                variability=chunked_variability_A_top,
-                pp=pp,
-                variability_type=variability_type,
-                filename=f"{pipe.id}/time_scales_{variability_type}_A.png",
-                show=False,
-                fit_curve=False,
-                handle="A",
-            )
-
-            plot_top_variability_timescales(
-                variability=chunked_variability_B_top,
-                pp=pp,
-                variability_type=variability_type,
-                filename=f"{pipe.id}/time_scales_{variability_type}_B.png",
-                show=False,
-                fit_curve=False,
-                handle="B",
-            )
+            write_result_to_csv(result, csv_file)
+            results.append(result)
 
         except Exception as e:
             print(" Exception caused the image generation to stop ", e)
             print(e)
-    return log
+            raise e
+    return log, results
 
 
 def run_all_pipelines(search: str = None, plot: bool = True, force_chunk: bool = False):
@@ -919,6 +1071,7 @@ def run_pipeline(
                 title=f"Spectral shape (pi column)",
                 A_handle=f"A : {metaA.star}",
                 B_handle=f"B : {metaB.star}",
+                saveplot=plot,
             )
             plot_wavelength_counts_histogram(
                 event_data_A=event_data_A,
@@ -929,6 +1082,7 @@ def run_pipeline(
                 title="Spectral shape (Wavelength nm)",
                 A_handle=f"A : {metaA.star}",
                 B_handle=f"B : {metaB.star}",
+                saveplot=plot,
             )
 
             print_source_visualizations(
@@ -955,10 +1109,11 @@ def run_pipeline(
                 handle="B",
             )
 
-            logs.extend(
-                compare_two_sets(pipe=pipeline, metaA=metaA, metaB=metaB, pp=pp)
-            )
-            print(f"Finished pipe {pipeline.id}")
+        log, result = compare_two_sets(
+            pipe=pipeline, metaA=metaA, metaB=metaB, pp=pp, plot=plot
+        )
+        logs.extend(log)
+        print(f"Finished pipe {pipeline.id}")
     except Exception as e:
         print(f"ERROR in pipeline {pipeline.id}, aborting")
         print(e)

@@ -214,8 +214,8 @@ def load_processing_param(id) -> ProcessingParameters:
                 data["time_bin_widths_count"] = 1
             if "time_bin_chunk_length" not in data:
                 data["time_bin_chunk_length"] = 12
-            if "take_top_variability_count" not in data:
-                data["take_top_variability_count"] = 10
+            if "variability_percentile" not in data:
+                data["variability_percentile"] = 10
             if "phase_bins" not in data:
                 data["phase_bins"] = 12
 
@@ -242,7 +242,7 @@ def load_processing_param(id) -> ProcessingParameters:
                 variability_type=data.get("variability_type", "neighbour"),
                 percentile=data.get("percentile", None),
                 chunk_counts=data.get("chunk_counts", 100000),
-                take_top_variability_count=data["take_top_variability_count"],
+                variability_percentile=data["variability_percentile"],
                 phase_bins=data["phase_bins"],
             )
         assert metadata.id == id, "What - the file and internal id has diverged"

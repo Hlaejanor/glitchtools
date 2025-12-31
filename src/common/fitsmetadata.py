@@ -79,7 +79,7 @@ class ProcessingParameters:
     anullus_radius_outer: float
     processed_filename: str
     phase_bins: int
-    take_top_variability_count: int | None
+    variability_percentile: int | None
     padding_strategy: str
     source_radius: float
     percentile: float
@@ -114,7 +114,7 @@ class ProcessingParameters:
         Annullus radius inner : {self.anullus_radius_inner} \n
         Annullus radius outer: {self.anullus_radius_outer} \n
         Source radius : {self.source_radius} \n
-        Take top variability count : {self.take_top_variability_count} \n
+        Take top variability count : {self.variability_percentile} \n
         Wavelength bin padding strategy :  {self.padding_strategy}
         Wavelength bin downsampling strategy :  {self.downsample_strategy}
         Downsample target count :  {self.downsample_target_count}
@@ -123,7 +123,7 @@ class ProcessingParameters:
         Variability type :  {self.variability_type}
         """
 
-    # This is same as to_string, except some parameters are removed such as take_top_variability_count.
+    # This is same as to_string, except some parameters are removed such as variability_percentile.
     # Including these would lead to cahche invalidation too early
     def to_string_cachebreaker(self):
         return f"""Processing params : \n 

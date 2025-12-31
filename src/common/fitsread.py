@@ -36,7 +36,7 @@ def generate_metadata_from_fits(
         x = np.mean(data["x"])
         y = np.mean(data["y"])
 
-        # Energy bounds — or calculate from PI channel if needed
+        # Energy bounds - or calculate from PI channel if needed
         try:
             energy = data["energy"]  # if energy is in eV or keV directly
         except KeyError:
